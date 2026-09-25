@@ -11,10 +11,10 @@ object OnboardingSample {
         val centerX = (screenWidthDp / 2).dp
 
         return listOf(
-            // ۳. شکل مثلث (Triangle)
+            // 1. Triangle Highlight
             GuideStep(
-                title = "هایلایت مثلثی (Triangle)",
-                description = "مناسب برای آیکون‌های پخش ویدیو (Play) و نشانگرهای جهتی.",
+                title = "Triangle Spotlight",
+                description = "Ideal for media play icons, video controls, and directional indicators.",
                 spotlights = listOf(
                     SpotlightShape(
                         offsetDp = DpOffset(x = centerX, y = 480.dp),
@@ -25,10 +25,10 @@ object OnboardingSample {
                     )
                 )
             ),
-            // ۲. شکل شش‌ضلعی (Polygon / Hexagon)
+            // 2. Polygon / Hexagon Highlight
             GuideStep(
-                title = "هایلایت شش‌ضلعی (Polygon)",
-                description = "مناسب برای آیکون‌های مدال، پروفایل‌های خاص و نشان‌های افتخار.",
+                title = "Polygon Spotlight",
+                description = "Perfect for badges, achievements, reward icons, and custom avatars.",
                 spotlights = listOf(
                     SpotlightShape(
                         offsetDp = DpOffset(x = centerX, y = 340.dp),
@@ -39,10 +39,10 @@ object OnboardingSample {
                     )
                 )
             ),
-            // ۱. شکل ستاره (Star)
+            // 3. Star Highlight
             GuideStep(
-                title = "هایلایت ستاره‌ای (Star)",
-                description = "مناسب برای امتیازدهی، المان‌های ویژه، گامیفیکیشن و آیکون‌های محبوب.",
+                title = "Star Spotlight",
+                description = "Great for ratings, gamification elements, featured items, and favorites.",
                 spotlights = listOf(
                     SpotlightShape(
                         offsetDp = DpOffset(x = centerX, y = 200.dp),
@@ -54,10 +54,10 @@ object OnboardingSample {
                     )
                 )
             ),
-            // ۱. شکل دایره‌ای (Circle)
+            // 4. Circle Highlight
             GuideStep(
-                title = "هایلایت دایره‌ای (Circle)",
-                description = "مناسب برای آیکون‌های پروفایل، دکمه‌های شناور (FAB) و آیکون‌های گرد.",
+                title = "Circle Spotlight",
+                description = "Suitable for profile avatars, Floating Action Buttons (FAB), and round icons.",
                 spotlights = listOf(
                     SpotlightShape(
                         offsetDp = DpOffset(x = centerX, y = 180.dp),
@@ -66,10 +66,10 @@ object OnboardingSample {
                 )
             ),
 
-            // ۲. شکل مستطیل با گوشه‌های گرد (RoundedRect)
+            // 5. Rounded Rectangle Highlight
             GuideStep(
-                title = "هایلایت مستطیلی (RoundedRect)",
-                description = "مناسب برای کارت‌ها، بنرها و باکس‌های توضیحات با میزان گردی دلخواه.",
+                title = "Rounded Rect Spotlight",
+                description = "Best for cards, banners, and message containers with customizable corner radiuses.",
                 spotlights = listOf(
                     SpotlightShape(
                         offsetDp = DpOffset(x = centerX, y = 300.dp),
@@ -82,10 +82,10 @@ object OnboardingSample {
                 )
             ),
 
-            // ۳. شکل بیضی (Oval)
+            // 6. Oval Highlight
             GuideStep(
-                title = "هایلایت بیضی (Oval)",
-                description = "مناسب برای المان‌های بیضی شکل، لوگوها و دکمه‌های پهن افقی یا عمودی.",
+                title = "Oval Spotlight",
+                description = "Designed for elliptical components, wider logos, and horizontal/vertical buttons.",
                 spotlights = listOf(
                     SpotlightShape(
                         offsetDp = DpOffset(x = centerX, y = 420.dp),
@@ -97,10 +97,10 @@ object OnboardingSample {
                 )
             ),
 
-            // ۴. شکل کپسولی (Capsule / Pill)
+            // 7. Capsule / Pill Highlight
             GuideStep(
-                title = "هایلایت کپسولی (Capsule)",
-                description = "مناسب برای Chipها، دکمه‌های کاملاً گرد و نشان‌های وضعیت (Badges).",
+                title = "Capsule Spotlight",
+                description = "Ideal for UI chips, fully rounded buttons, tags, and status badges.",
                 spotlights = listOf(
                     SpotlightShape(
                         offsetDp = DpOffset(x = centerX, y = 520.dp),
@@ -112,10 +112,10 @@ object OnboardingSample {
                 )
             ),
 
-            // ۵. شکل مستطیل با گوشه‌های برش‌خورده (CutCornerRect)
+            // 8. Cut Corner Rectangle Highlight
             GuideStep(
-                title = "هایلایت گوشه برش‌خورده (CutCornerRect)",
-                description = "مناسب برای سبک‌های طراحی خاص، مدرن و کارت‌های پَربری‌شده.",
+                title = "Cut Corner Rect Spotlight",
+                description = "Perfect for modern cyberpunk designs, chamfered cards, and distinct UI actions.",
                 spotlights = listOf(
                     SpotlightShape(
                         offsetDp = DpOffset(x = centerX, y = 620.dp),
@@ -128,10 +128,10 @@ object OnboardingSample {
                 )
             ),
 
-            // ۶. نمونه ترکیب چند Spotlight همزمان (Multi-Spotlight)
+            // 9. Multi-Spotlight Combination
             GuideStep(
-                title = "چند هایلایت همزمان (Multi-Spotlight)",
-                description = "می‌توانید به‌طور همزمان چند بخش مختلف صفحه را هایلایت کنید.",
+                title = "Multi-Spotlight Support",
+                description = "Highlight multiple distinct UI elements simultaneously in a single step.",
                 spotlights = listOf(
                     SpotlightShape(
                         offsetDp = DpOffset(x = 60.dp, y = 100.dp),

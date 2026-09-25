@@ -29,10 +29,15 @@ fun SpotlyDemoScreen() {
         onSkipOrFinish = {
         },
         colors = SpotlyColors(
-            containerBackground = Color(0xFF1E1E1E),
-            buttonBackgroundColor = Color(0xFF6200EE),
-            buttonTextColor = Color.White
-        )
+            containerBackground = Color(0xFF3200EE),
+            buttonBackgroundColor = Color(0xFFFFEB3B),
+            buttonTextColor = Color(0xFF3200EE)
+        ),
+        skipText = "Skip Guide",
+        finishText = "Finish",
+        nextText = "Next",
+        previousText = "Previous",
+            
     )
 }
 
