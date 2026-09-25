@@ -137,17 +137,17 @@ The library separates onboarding state from rendering, keeping your UI code clea
 
 # 📦 Installation
 
-Add the Spotly dependency to your module-level `build.gradle.kts`:
+Add the Spotly Onboarding dependency to your app-level build.gradle.kts file:
 
-```kotlin
 dependencies {
-    implementation("com.spotly:onboarding:<version>")
+    implementation("io.github.bahar-developer:spotly-onboarding:1.0.0")
 }
-```
+
+Then sync your project with Gradle.
+
+Requirements: Kotlin 2.0+ and Jetpack Compose 1.7+
 
 > Replace `<version>` with the latest released version.
-
-If Spotly is published through GitHub Packages or another Maven repository, add the corresponding repository to your project configuration.
 
 ---
 
@@ -155,8 +155,7 @@ If Spotly is published through GitHub Packages or another Maven repository, add 
 
 ## 1. Create Your Onboarding Steps
 
-Define your onboarding flow using `GuideStep`:
-
+After adding the dependency, you can import Spotly components and create your onboarding flow.
 ```kotlin
 val steps = listOf(
     GuideStep(
