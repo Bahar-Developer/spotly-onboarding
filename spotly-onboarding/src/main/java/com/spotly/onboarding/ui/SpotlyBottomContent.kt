@@ -1,5 +1,4 @@
-package com.spotly.onboarding.ui
-
+package com.golrang.zap.zapdriver.core.guid
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -26,10 +24,8 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.compose.ui.unit.dp
 import com.spotly.onboarding.theme.SpotlyColors
 
 @Composable
@@ -37,22 +33,22 @@ internal fun SpotlyBottomContent(
     title: String,
     description: String,
     progress: Float,
-    isLastStep: Boolean,
     isFirstStep: Boolean,
-    colors: SpotlyColors,
-    nextText: String = "بعدی",
-    previousText: String = "قبلی",
-    skipText: String = "رد کردن راهنما",
-    finishText: String = "پایان راهنما",
+    isLastStep: Boolean,
+    showNavigationButtons: Boolean,
     onNext: () -> Unit,
     onSkipOrFinish: () -> Unit,
     onPreviousStep: () -> Unit,
+    colors: SpotlyColors
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Bottom
     ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
+        Box(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+
             SpotlyProgressIndicator(
                 progress = progress,
                 color = colors.progressColor,
@@ -65,58 +61,92 @@ internal fun SpotlyBottomContent(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(colors.containerBackground)
+                    .background(
+                        color = colors.containerBackground
+                    )
                     .navigationBarsPadding()
                     .padding(16.dp)
             ) {
+
                 Text(
                     text = title,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
                     color = colors.titleColor
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(
+                    modifier = Modifier.height(8.dp)
+                )
 
                 Text(
                     text = description,
-                    fontSize = 14.sp,
                     color = colors.descriptionColor
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                if (showNavigationButtons) {
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    if (!isFirstStep) {
-                        TextButton(onClick = onPreviousStep) {
-                            Text(text = previousText, color = colors.titleColor)
-                        }
-                    } else if (!isLastStep) {
-                        TextButton(onClick = onSkipOrFinish) {
-                            Text(text = skipText, color = colors.titleColor)
-                        }
-                    } else {
-                        Spacer(modifier = Modifier.width(1.dp))
-                    }
+                    Spacer(
+                        modifier = Modifier.height(16.dp)
+                    )
 
-                    Button(
-                        onClick = {
-                            if (isLastStep) onSkipOrFinish() else onNext()
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = colors.buttonBackgroundColor,
-                            contentColor = colors.buttonTextColor
-                        ),
-                        shape = CircleShape
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(
-                            text = if (isLastStep) finishText else nextText,
-                            fontWeight = FontWeight.Bold
-                        )
+
+                        if (!isFirstStep) {
+
+                            TextButton(
+                                onClick = onPreviousStep
+                            ) {
+                                Text(
+                                    text = "قبلی",
+                                    color = colors.buttonBackgroundColor
+                                )
+                            }
+
+                        } else if (!isLastStep) {
+
+                            TextButton(
+                                onClick = onSkipOrFinish
+                            ) {
+                                Text(
+                                    text = "رد کردن راهنما",
+                                    color = colors.buttonBackgroundColor
+                                )
+                            }
+
+                        } else {
+
+                            Spacer(
+                                modifier = Modifier.width(1.dp)
+                            )
+                        }
+
+                        Button(
+                            modifier = Modifier.width(120.dp),
+                            onClick = {
+                                if (isLastStep) {
+                                    onSkipOrFinish()
+                                } else {
+                                    onNext()
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor =
+                                    colors.buttonBackgroundColor,
+                                contentColor =
+                                    colors.buttonTextColor
+                            )
+                        ) {
+                            Text(
+                                text = if (isLastStep) {
+                                    "پایان راهنما"
+                                } else {
+                                    "بعدی"
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -130,17 +160,34 @@ private fun SpotlyProgressIndicator(
     color: Color,
     modifier: Modifier = Modifier
 ) {
-    Canvas(modifier = modifier.height(4.dp)) {
-        val clampedProgress = progress.coerceIn(0f, 1f)
-        val progressWidth = size.width * clampedProgress
+    Canvas(
+        modifier = modifier.height(4.dp)
+    ) {
 
-        if (progressWidth <= 0f) return@Canvas
+        val clampedProgress =
+            progress.coerceIn(0f, 1f)
+
+        val progressWidth =
+            size.width * clampedProgress
+
+        if (progressWidth <= 0f) {
+            return@Canvas
+        }
 
         drawRoundRect(
             color = color,
-            topLeft = Offset(x = size.width - progressWidth, y = 0f),
-            size = Size(width = progressWidth, height = size.height),
-            cornerRadius = CornerRadius(x = size.height / 2f, y = size.height / 2f)
+            topLeft = Offset(
+                x = size.width - progressWidth,
+                y = 0f
+            ),
+            size = Size(
+                width = progressWidth,
+                height = size.height
+            ),
+            cornerRadius = CornerRadius(
+                x = size.height / 2f,
+                y = size.height / 2f
+            )
         )
     }
 }
