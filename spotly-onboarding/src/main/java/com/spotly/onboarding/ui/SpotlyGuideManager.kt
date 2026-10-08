@@ -39,18 +39,28 @@ import com.spotly.onboarding.ui.MorphingMultiSpotlightOverlay
 import kotlinx.coroutines.delay
 
 
-
 @Composable
 fun SpotlyGuideManager(
     steps: List<GuideStep>,
     currentStepIndex: Int,
+
+    /*
+     * API فعلی شما بدون تغییر باقی می‌ماند.
+     */
     onNextStep: () -> Unit,
     onSkipOrFinish: () -> Unit,
     onPreviousStep: () -> Unit,
+
     modifier: Modifier = Modifier,
+
     colors: SpotlyColors = SpotlyColors()
 ) {
 
+    /*
+     * ---------------------------------------------------------
+     * SAFETY
+     * ---------------------------------------------------------
+     */
     if (
         steps.isEmpty() ||
         currentStepIndex !in steps.indices
@@ -58,42 +68,68 @@ fun SpotlyGuideManager(
         return
     }
 
-    val currentStep = steps[currentStepIndex]
+
+    /*
+     * ---------------------------------------------------------
+     * CURRENT STEP
+     * ---------------------------------------------------------
+     */
+    val currentStep =
+        steps[currentStepIndex]
+
 
     val isFirstStep =
         currentStepIndex == 0
+
 
     val isLastStep =
         currentStepIndex == steps.lastIndex
 
 
     /*
-     * Controls the visibility of the whole bottom content.
-     *
-     * This is NOT related to showDescription.
-     *
-     * It is only responsible for the transition
-     * between onboarding steps.
+     * ---------------------------------------------------------
+     * BOTTOM CONTENT VISIBILITY
+     * ---------------------------------------------------------
      */
     var showBottomContent by remember {
-        mutableStateOf(currentStep.showDescription)
+        mutableStateOf(
+            currentStep.showDescription
+        )
     }
 
 
     /*
-     * Every time the step changes,
-     * show the new bottom content.
+     * هر بار step عوض شد،
+     * visibility مربوط به step جدید را تنظیم کن.
      */
-    LaunchedEffect(currentStepIndex, currentStep.showDescription) {
-        showBottomContent = currentStep.showDescription
+    LaunchedEffect(
+        currentStepIndex,
+        currentStep.showDescription
+    ) {
+
+        showBottomContent =
+            currentStep.showDescription
     }
 
 
     /*
-     * Automatic step handling.
+     * ---------------------------------------------------------
+     * AUTO ADVANCE
+     * ---------------------------------------------------------
      *
-     * This logic is completely independent
-     * from showDescription.
+     * اگر step Auto باشد:
+     *
+     *     2 -> بعد از تایمر -> 3
+     *     3 -> بعد از تایمر -> 4
+     *     4 -> بعد از تایمر -> 5
+     *     5 -> بعد از تایمر -> 6
+     *
+     * وقتی Previous از 6 زده شود:
+     *
+     *     6 -> 2
+     *
+     * و چون currentStepIndex تغییر کرده،
+     * LaunchedEffect برای step 2 دوباره اجرا می‌شود.
      */
     LaunchedEffect(
         currentStepIndex,
@@ -105,6 +141,10 @@ fun SpotlyGuideManager(
             return@LaunchedEffect
         }
 
+
+        /*
+         * صبر برای تایمر step فعلی
+         */
         delay(
             currentStep.autoAdvanceDurationMillis
                 .coerceAtLeast(1L)
@@ -112,43 +152,64 @@ fun SpotlyGuideManager(
 
 
         /*
-         * Fade out the whole bottom content
-         * before changing the step.
+         * fade out
          */
         showBottomContent = false
 
 
         /*
-         * Give the fade-out animation enough
-         * time to finish.
+         * صبر برای تمام شدن fade
          */
         delay(
             BOTTOM_CONTENT_ANIMATION_DURATION.toLong()
         )
 
 
-        if (isLastStep) {
+        /*
+         * اگر آخرین step هستیم،
+         * onboarding تمام شود.
+         */
+        if (currentStepIndex == steps.lastIndex) {
+
             onSkipOrFinish()
+
         } else {
+
+            /*
+             * step بعدی
+             */
             onNextStep()
         }
     }
 
 
+    /*
+     * ---------------------------------------------------------
+     * SCROLL
+     * ---------------------------------------------------------
+     */
     val scrollState =
         rememberScrollState()
+
 
     val density =
         LocalDensity.current
 
+
     var imageSize by remember {
-        mutableStateOf(IntSize.Zero)
+        mutableStateOf(
+            IntSize.Zero
+        )
     }
 
 
     /*
-     * Animate image scroll position
-     * when the current step changes.
+     * ---------------------------------------------------------
+     * IMAGE SCROLL
+     * ---------------------------------------------------------
+     *
+     * با تغییر step،
+     * تصویر به position مربوط به آن step می‌رود.
      */
     LaunchedEffect(
         currentStepIndex,
@@ -162,21 +223,28 @@ fun SpotlyGuideManager(
                                 .coerceIn(0f, 1f)
                     ).toInt()
 
+
         scrollState.animateScrollTo(
-            value = targetScrollPx.coerceIn(
-                0,
-                scrollState.maxValue
-            ),
-            animationSpec = spring(
-                stiffness = Spring.StiffnessLow
-            )
+
+            value =
+                targetScrollPx.coerceIn(
+                    0,
+                    scrollState.maxValue
+                ),
+
+            animationSpec =
+                spring(
+                    stiffness =
+                        Spring.StiffnessLow
+                )
         )
     }
 
 
     /*
-     * Calculate spotlight positions according
-     * to the actual image width and scroll position.
+     * ---------------------------------------------------------
+     * SPOTLIGHT CALCULATION
+     * ---------------------------------------------------------
      */
     val calculatedSpotlights =
         remember(
@@ -187,20 +255,34 @@ fun SpotlyGuideManager(
         ) {
 
             if (imageSize.width == 0) {
+
                 currentStep.spotlights
+
             } else {
 
+                /*
+                 * Base design width
+                 */
                 val baseWidthPx =
                     with(density) {
                         360.dp.toPx()
                     }
 
+
+                /*
+                 * Scale image
+                 */
                 val scale =
                     imageSize.width.toFloat() /
                             baseWidthPx
 
+
+                /*
+                 * Current scroll
+                 */
                 val scrollYPx =
                     scrollState.value.toFloat()
+
 
                 currentStep.spotlights.map { item ->
 
@@ -209,6 +291,7 @@ fun SpotlyGuideManager(
                             item.offsetDp.x.toPx()
                         } * scale
 
+
                     val yPx =
                         (
                                 with(density) {
@@ -216,195 +299,471 @@ fun SpotlyGuideManager(
                                 } * scale
                                 ) - scrollYPx
 
+
                     SpotlightShape(
-                        offsetDp = DpOffset(
-                            x = with(density) {
-                                xPx.toDp()
-                            },
-                            y = with(density) {
-                                yPx.toDp()
-                            }
-                        ),
-                        shape = scaleTargetShape(
-                            shape = item.shape,
-                            scale = scale,
-                            density = density
-                        )
+
+                        offsetDp =
+                            DpOffset(
+
+                                x =
+                                    with(density) {
+                                        xPx.toDp()
+                                    },
+
+                                y =
+                                    with(density) {
+                                        yPx.toDp()
+                                    }
+                            ),
+
+                        shape =
+                            scaleTargetShape(
+                                shape = item.shape,
+                                scale = scale,
+                                density = density
+                            )
                     )
                 }
             }
         }
 
 
+    /*
+     * ---------------------------------------------------------
+     * MAIN UI
+     * ---------------------------------------------------------
+     */
     Box(
-        modifier = modifier.fillMaxSize()
+        modifier =
+            modifier.fillMaxSize()
     ) {
 
+
         /*
-         * Onboarding image.
+         * -----------------------------------------------------
+         * ONBOARDING IMAGE
+         * -----------------------------------------------------
          */
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .clipToBounds()
-                .verticalScroll(
-                    state = scrollState,
-                    enabled = false
-                )
+
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .clipToBounds()
+                    .verticalScroll(
+                        state = scrollState,
+                        enabled = false
+                    )
         ) {
 
             CustomImage(
-                id = currentStep.imageRes,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .onGloballyPositioned { coordinates ->
-                        imageSize = coordinates.size
-                    },
-                contentScale = ContentScale.FillWidth
+
+                id =
+                    currentStep.imageRes,
+
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .onGloballyPositioned {
+                                coordinates ->
+
+                            imageSize =
+                                coordinates.size
+                        },
+
+                contentScale =
+                    ContentScale.FillWidth
             )
         }
 
 
         /*
-         * Spotlight overlay.
+         * -----------------------------------------------------
+         * SPOTLIGHT OVERLAY
+         * -----------------------------------------------------
          */
         MorphingMultiSpotlightOverlay(
-            spotlights = calculatedSpotlights,
-            overlayColor = colors.overlayColor,
-            modifier = Modifier.fillMaxSize()
+
+            spotlights =
+                calculatedSpotlights,
+
+            overlayColor =
+                colors.overlayColor,
+
+            modifier =
+                Modifier.fillMaxSize()
         )
 
 
         /*
-         * Bottom content.
-         *
-         * This animation controls the whole
-         * bottom content when changing steps.
-         *
-         * showDescription is handled separately
-         * inside SpotlyBottomContent.
+         * -----------------------------------------------------
+         * BOTTOM CONTENT
+         * -----------------------------------------------------
          */
         AnimatedVisibility(
-            visible = showBottomContent,
-            enter = fadeIn(
-                animationSpec = tween(
-                    durationMillis =
-                        BOTTOM_CONTENT_ANIMATION_DURATION
-                )
-            ),
-            exit = fadeOut(
-                animationSpec = tween(
-                    durationMillis =
-                        BOTTOM_CONTENT_ANIMATION_DURATION
-                )
-            ),
-            modifier = Modifier.fillMaxSize()
+
+            visible =
+                showBottomContent,
+
+            enter =
+                fadeIn(
+                    animationSpec =
+                        tween(
+                            durationMillis =
+                                BOTTOM_CONTENT_ANIMATION_DURATION
+                        )
+                ),
+
+            exit =
+                fadeOut(
+                    animationSpec =
+                        tween(
+                            durationMillis =
+                                BOTTOM_CONTENT_ANIMATION_DURATION
+                        )
+                ),
+
+            modifier =
+                Modifier.fillMaxSize()
         ) {
 
-          SpotlyBottomContent(
-                    title = currentStep.title,
+            SpotlyBottomContent(
 
-                    description = currentStep.description,
+                title =
+                    currentStep.title,
 
-                    progress =
-                        (currentStepIndex + 1f) /
-                                steps.size,
+                description =
+                    currentStep.description,
 
-                    isFirstStep = isFirstStep,
+                progress =
+                    (currentStepIndex + 1f) /
+                            steps.size,
 
-                    isLastStep = isLastStep,
+                isFirstStep =
+                    isFirstStep,
 
-                    /*
-                     * Navigation buttons are independent
-                     * from showDescription.
-                     */
-                    showNavigationButtons = true,
+                isLastStep =
+                    isLastStep,
 
-                    onNext = {
-                        handleManualStepChange(
-                            showBottomContent = {
-                                showBottomContent = false
-                            },
-                            onNextStep = onNextStep
-                        )
-                    },
+                /*
+                 * دکمه‌ها مستقل از showDescription هستند.
+                 */
+                showNavigationButtons =
+                    true,
 
-                    onSkipOrFinish = {
-                        handleManualStepChange(
-                            showBottomContent = {
-                                showBottomContent = false
-                            },
-                            onSkipOrFinish = onSkipOrFinish
-                        )
-                    },
 
-                    onPreviousStep = {
-                        handleManualStepChange(
-                            showBottomContent = {
-                                showBottomContent = false
-                            },
-                            onPreviousStep = onPreviousStep
-                        )
-                    },
+                /*
+                 * -------------------------------------------------
+                 * NEXT
+                 * -------------------------------------------------
+                 */
+                onNext = {
 
-                    colors = colors
-                )
+                    handleManualStepChange(
+
+                        showBottomContent = {
+                            showBottomContent = false
+                        },
+
+                        action = {
+                            onNextStep()
+                        }
+                    )
+                },
+
+
+                /*
+                 * -------------------------------------------------
+                 * SKIP / FINISH
+                 * -------------------------------------------------
+                 */
+                onSkipOrFinish = {
+
+                    handleManualStepChange(
+
+                        showBottomContent = {
+                            showBottomContent = false
+                        },
+
+                        action = {
+                            onSkipOrFinish()
+                        }
+                    )
+                },
+
+
+                /*
+                 * -------------------------------------------------
+                 * PREVIOUS
+                 * -------------------------------------------------
+                 *
+                 * این قسمت منطق اصلی است.
+                 *
+                 * مثال:
+                 *
+                 * 0 normal
+                 * 1 normal
+                 * 2 auto
+                 * 3 auto
+                 * 4 auto
+                 * 5 auto
+                 * 6 normal
+                 *
+                 * current = 6
+                 *
+                 * Previous:
+                 *
+                 * 6 -> 2
+                 *
+                 * current = 5
+                 *
+                 * Previous:
+                 *
+                 * 5 -> 2
+                 */
+                onPreviousStep = {
+
+                    handleManualStepChange(
+
+                        showBottomContent = {
+                            showBottomContent = false
+                        },
+
+                        action = {
+
+                            /*
+                             * مقصد Previous را پیدا کن.
+                             */
+                            val previousIndex =
+                                findPreviousStepIndex(
+                                    steps =
+                                        steps,
+
+                                    currentIndex =
+                                        currentStepIndex
+                                )
+
+
+                            /*
+                             * چند step باید عقب برویم؟
+                             *
+                             * مثال:
+                             *
+                             * current = 6
+                             * target = 2
+                             *
+                             * result = 4
+                             */
+                            val stepsToGoBack =
+                                currentStepIndex -
+                                        previousIndex
+
+
+                            /*
+                             * چون API فعلی Parent
+                             * فقط currentIndex-- دارد،
+                             * به همان تعداد onPreviousStep
+                             * را صدا می‌زنیم.
+                             *
+                             * 6 -> 5 -> 4 -> 3 -> 2
+                             */
+                            repeat(
+                                stepsToGoBack
+                            ) {
+
+                                onPreviousStep()
+                            }
+                        }
+                    )
+                },
+
+
+                colors =
+                    colors
+            )
         }
     }
 }
 
 
-private fun handleManualStepChange(
-    showBottomContent: () -> Unit,
-    onNextStep: (() -> Unit)? = null,
-    onPreviousStep: (() -> Unit)? = null,
-    onSkipOrFinish: (() -> Unit)? = null
-) {
+/*
+ * =============================================================
+ * FIND PREVIOUS STEP
+ * =============================================================
+ *
+ * هدف:
+ *
+ * اگر step قبلی Auto باشد،
+ * ابتدای گروه Auto را پیدا کن.
+ *
+ *
+ * مثال:
+ *
+ * 0 normal
+ * 1 normal
+ * 2 auto
+ * 3 auto
+ * 4 auto
+ * 5 auto
+ * 6 normal
+ *
+ *
+ * نتیجه:
+ *
+ * current 6 -> 2
+ * current 5 -> 2
+ * current 4 -> 2
+ * current 3 -> 2
+ * current 2 -> 1
+ * current 1 -> 0
+ */
+private fun findPreviousStepIndex(
+    steps: List<GuideStep>,
+    currentIndex: Int
+): Int {
 
     /*
-     * Fade out bottom content first.
+     * اولین step
      */
-    showBottomContent()
-
-    when {
-        onNextStep != null ->
-            onNextStep()
-
-        onPreviousStep != null ->
-            onPreviousStep()
-
-        onSkipOrFinish != null ->
-            onSkipOrFinish()
+    if (currentIndex <= 0) {
+        return 0
     }
+
+
+    /*
+     * step قبلی
+     */
+    var previousIndex =
+        currentIndex - 1
+
+
+    /*
+     * اگر step قبلی Auto نیست،
+     * فقط یک step عقب برو.
+     *
+     * مثال:
+     *
+     * 6 normal
+     * 5 normal
+     *
+     * 6 -> 5
+     */
+    if (
+        !steps[previousIndex].isAutoAdvance
+    ) {
+
+        return previousIndex
+    }
+
+
+    /*
+     * step قبلی Auto است.
+     *
+     * حالا ابتدای گروه Auto را پیدا می‌کنیم.
+     *
+     * مثلاً:
+     *
+     * 2 Auto
+     * 3 Auto
+     * 4 Auto
+     * 5 Auto
+     *
+     * از 5 شروع می‌کنیم:
+     *
+     * 5
+     * 4
+     * 3
+     * 2
+     */
+    while (
+        previousIndex > 0 &&
+        steps[previousIndex - 1].isAutoAdvance
+    ) {
+
+        previousIndex--
+    }
+
+
+    /*
+     * اولین Auto گروه
+     */
+    return previousIndex
 }
 
 
-private const val BOTTOM_CONTENT_ANIMATION_DURATION = 300
+/*
+ * =============================================================
+ * MANUAL STEP CHANGE
+ * =============================================================
+ */
+private fun handleManualStepChange(
+    showBottomContent: () -> Unit,
+    action: () -> Unit
+) {
+
+    /*
+     * اول fade out
+     */
+    showBottomContent()
 
 
+    /*
+     * بعد تغییر step
+     */
+    action()
+}
+
+
+/*
+ * =============================================================
+ * CONSTANT
+ * =============================================================
+ */
+private const val
+        BOTTOM_CONTENT_ANIMATION_DURATION =
+    300
+
+
+/*
+ * =============================================================
+ * SCALE TARGET SHAPE
+ * =============================================================
+ */
 private fun scaleTargetShape(
     shape: TargetShape,
     scale: Float,
     density: androidx.compose.ui.unit.Density
 ): TargetShape {
 
+
     fun Dp.scale(): Dp {
+
         return with(density) {
-            (toPx() * scale).toDp()
+
+            (
+                    toPx() * scale
+                    ).toDp()
         }
     }
 
+
     return when (shape) {
 
+
         is TargetShape.Circle -> {
+
             TargetShape.Circle(
+
                 radiusDp =
                     shape.radiusDp.scale()
             )
         }
 
+
         is TargetShape.RoundedRect -> {
+
             TargetShape.RoundedRect(
+
                 widthDp =
                     shape.widthDp.scale(),
 
@@ -415,9 +774,12 @@ private fun scaleTargetShape(
                     shape.cornerRadiusDp.scale()
             )
         }
+
 
         is TargetShape.Rectangle -> {
+
             TargetShape.Rectangle(
+
                 widthDp =
                     shape.widthDp.scale(),
 
@@ -429,8 +791,11 @@ private fun scaleTargetShape(
             )
         }
 
+
         is TargetShape.Oval -> {
+
             TargetShape.Oval(
+
                 widthDp =
                     shape.widthDp.scale(),
 
@@ -438,9 +803,12 @@ private fun scaleTargetShape(
                     shape.heightDp.scale()
             )
         }
+
 
         is TargetShape.Capsule -> {
+
             TargetShape.Capsule(
+
                 widthDp =
                     shape.widthDp.scale(),
 
@@ -449,8 +817,11 @@ private fun scaleTargetShape(
             )
         }
 
+
         is TargetShape.CutCornerRect -> {
+
             TargetShape.CutCornerRect(
+
                 widthDp =
                     shape.widthDp.scale(),
 
@@ -462,8 +833,11 @@ private fun scaleTargetShape(
             )
         }
 
+
         is TargetShape.Star -> {
+
             TargetShape.Star(
+
                 radiusDp =
                     shape.radiusDp.scale(),
 
@@ -475,8 +849,11 @@ private fun scaleTargetShape(
             )
         }
 
+
         is TargetShape.Triangle -> {
+
             TargetShape.Triangle(
+
                 widthDp =
                     shape.widthDp.scale(),
 
@@ -485,8 +862,11 @@ private fun scaleTargetShape(
             )
         }
 
+
         is TargetShape.Polygon -> {
+
             TargetShape.Polygon(
+
                 radiusDp =
                     shape.radiusDp.scale(),
 
@@ -496,6 +876,7 @@ private fun scaleTargetShape(
         }
     }
 }
+
 @Composable
 fun CustomImage(modifier: Modifier = Modifier, id: Int, contentScale:ContentScale= ContentScale.FillBounds) {
     Image(
