@@ -68,7 +68,9 @@ object OnboardingSample {
                             cornerRadiusDp = 0.dp
                         )
                     )
-                )
+                ),
+                isAutoAdvance = true,
+                showDescription = false
             ),
             GuideStep(
                 title = "وضعیت های شیفت",
@@ -85,7 +87,8 @@ object OnboardingSample {
                         )
                     )
                 ),
-                isAutoAdvance = true
+                isAutoAdvance = true,
+                showDescription = false
             ),
             GuideStep(
                 title = "وضعیت های شیفت",
@@ -102,7 +105,8 @@ object OnboardingSample {
                         )
                     )
                 ),
-                isAutoAdvance = true
+                isAutoAdvance = true,
+                showDescription = false
             ),
             GuideStep(
                 title = "جزئیات و مزایای شیفت",

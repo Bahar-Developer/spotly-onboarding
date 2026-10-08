@@ -22,7 +22,7 @@ data class GuideStep(
      * If false, navigation buttons are shown.
      */
     val isAutoAdvance: Boolean = false,
-
+    val showDescription: Boolean = true,
     /**
      * Duration before automatically moving
      * to the next step.

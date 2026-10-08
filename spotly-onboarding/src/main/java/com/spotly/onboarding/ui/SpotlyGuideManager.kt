@@ -1,7 +1,11 @@
-package com.golrang.zap.zapdriver.core.guid
+package com.spotly.onboarding.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +29,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import com.golrang.zap.zapdriver.core.guid.SpotlyBottomContent
 import com.spotly.onboarding.model.GuideStep
 import com.spotly.onboarding.model.SpotlightShape
 import com.spotly.onboarding.model.TargetShape
@@ -32,6 +37,7 @@ import com.spotly.onboarding.theme.SpotlyColors
 import com.spotly.onboarding.ui.MorphingMultiSpotlightOverlay
 
 import kotlinx.coroutines.delay
+
 
 
 @Composable
@@ -52,8 +58,7 @@ fun SpotlyGuideManager(
         return
     }
 
-    val currentStep =
-        steps[currentStepIndex]
+    val currentStep = steps[currentStepIndex]
 
     val isFirstStep =
         currentStepIndex == 0
@@ -61,14 +66,34 @@ fun SpotlyGuideManager(
     val isLastStep =
         currentStepIndex == steps.lastIndex
 
-    val isAutoAdvanceStep =
-        currentStep.isAutoAdvance
 
     /*
-     * Automatic navigation
+     * Controls the visibility of the whole bottom content.
      *
-     * Every time the current step changes,
-     * this effect is cancelled and restarted.
+     * This is NOT related to showDescription.
+     *
+     * It is only responsible for the transition
+     * between onboarding steps.
+     */
+    var showBottomContent by remember {
+        mutableStateOf(currentStep.showDescription)
+    }
+
+
+    /*
+     * Every time the step changes,
+     * show the new bottom content.
+     */
+    LaunchedEffect(currentStepIndex, currentStep.showDescription) {
+        showBottomContent = currentStep.showDescription
+    }
+
+
+    /*
+     * Automatic step handling.
+     *
+     * This logic is completely independent
+     * from showDescription.
      */
     LaunchedEffect(
         currentStepIndex,
@@ -85,12 +110,30 @@ fun SpotlyGuideManager(
                 .coerceAtLeast(1L)
         )
 
+
+        /*
+         * Fade out the whole bottom content
+         * before changing the step.
+         */
+        showBottomContent = false
+
+
+        /*
+         * Give the fade-out animation enough
+         * time to finish.
+         */
+        delay(
+            BOTTOM_CONTENT_ANIMATION_DURATION.toLong()
+        )
+
+
         if (isLastStep) {
             onSkipOrFinish()
         } else {
             onNextStep()
         }
     }
+
 
     val scrollState =
         rememberScrollState()
@@ -99,14 +142,13 @@ fun SpotlyGuideManager(
         LocalDensity.current
 
     var imageSize by remember {
-        mutableStateOf(
-            IntSize.Zero
-        )
+        mutableStateOf(IntSize.Zero)
     }
 
+
     /*
-     * Scroll the onboarding image
-     * according to the current step.
+     * Animate image scroll position
+     * when the current step changes.
      */
     LaunchedEffect(
         currentStepIndex,
@@ -131,6 +173,11 @@ fun SpotlyGuideManager(
         )
     }
 
+
+    /*
+     * Calculate spotlight positions according
+     * to the actual image width and scroll position.
+     */
     val calculatedSpotlights =
         remember(
             currentStep.spotlights,
@@ -188,10 +235,14 @@ fun SpotlyGuideManager(
             }
         }
 
+
     Box(
         modifier = modifier.fillMaxSize()
     ) {
 
+        /*
+         * Onboarding image.
+         */
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -202,62 +253,134 @@ fun SpotlyGuideManager(
                 )
         ) {
 
-           CustomImage(
+            CustomImage(
                 id = currentStep.imageRes,
                 modifier = Modifier
                     .fillMaxWidth()
                     .onGloballyPositioned { coordinates ->
-                        imageSize =
-                            coordinates.size
+                        imageSize = coordinates.size
                     },
-                contentScale =
-                    ContentScale.FillWidth
+                contentScale = ContentScale.FillWidth
             )
         }
 
+
+        /*
+         * Spotlight overlay.
+         */
         MorphingMultiSpotlightOverlay(
-            spotlights =
-                calculatedSpotlights,
-            overlayColor =
-                colors.overlayColor,
-            modifier =
-                Modifier.fillMaxSize()
+            spotlights = calculatedSpotlights,
+            overlayColor = colors.overlayColor,
+            modifier = Modifier.fillMaxSize()
         )
 
-        SpotlyBottomContent(
-            title =
-                currentStep.title,
 
-            description =
-                currentStep.description,
+        /*
+         * Bottom content.
+         *
+         * This animation controls the whole
+         * bottom content when changing steps.
+         *
+         * showDescription is handled separately
+         * inside SpotlyBottomContent.
+         */
+        AnimatedVisibility(
+            visible = showBottomContent,
+            enter = fadeIn(
+                animationSpec = tween(
+                    durationMillis =
+                        BOTTOM_CONTENT_ANIMATION_DURATION
+                )
+            ),
+            exit = fadeOut(
+                animationSpec = tween(
+                    durationMillis =
+                        BOTTOM_CONTENT_ANIMATION_DURATION
+                )
+            ),
+            modifier = Modifier.fillMaxSize()
+        ) {
 
-            progress =
-                (currentStepIndex + 1f) /
-                        steps.size,
+          SpotlyBottomContent(
+                    title = currentStep.title,
 
-            isFirstStep =
-                isFirstStep,
+                    description = currentStep.description,
 
-            isLastStep =
-                isLastStep,
+                    progress =
+                        (currentStepIndex + 1f) /
+                                steps.size,
 
-            showNavigationButtons =
-                !isAutoAdvanceStep,
+                    isFirstStep = isFirstStep,
 
-            onNext =
-                onNextStep,
+                    isLastStep = isLastStep,
 
-            onSkipOrFinish =
-                onSkipOrFinish,
+                    /*
+                     * Navigation buttons are independent
+                     * from showDescription.
+                     */
+                    showNavigationButtons = true,
 
-            onPreviousStep =
-                onPreviousStep,
+                    onNext = {
+                        handleManualStepChange(
+                            showBottomContent = {
+                                showBottomContent = false
+                            },
+                            onNextStep = onNextStep
+                        )
+                    },
 
-            colors =
-                colors
-        )
+                    onSkipOrFinish = {
+                        handleManualStepChange(
+                            showBottomContent = {
+                                showBottomContent = false
+                            },
+                            onSkipOrFinish = onSkipOrFinish
+                        )
+                    },
+
+                    onPreviousStep = {
+                        handleManualStepChange(
+                            showBottomContent = {
+                                showBottomContent = false
+                            },
+                            onPreviousStep = onPreviousStep
+                        )
+                    },
+
+                    colors = colors
+                )
+        }
     }
 }
+
+
+private fun handleManualStepChange(
+    showBottomContent: () -> Unit,
+    onNextStep: (() -> Unit)? = null,
+    onPreviousStep: (() -> Unit)? = null,
+    onSkipOrFinish: (() -> Unit)? = null
+) {
+
+    /*
+     * Fade out bottom content first.
+     */
+    showBottomContent()
+
+    when {
+        onNextStep != null ->
+            onNextStep()
+
+        onPreviousStep != null ->
+            onPreviousStep()
+
+        onSkipOrFinish != null ->
+            onSkipOrFinish()
+    }
+}
+
+
+private const val BOTTOM_CONTENT_ANIMATION_DURATION = 300
+
 
 private fun scaleTargetShape(
     shape: TargetShape,
@@ -284,8 +407,10 @@ private fun scaleTargetShape(
             TargetShape.RoundedRect(
                 widthDp =
                     shape.widthDp.scale(),
+
                 heightDp =
                     shape.heightDp.scale(),
+
                 cornerRadiusDp =
                     shape.cornerRadiusDp.scale()
             )
@@ -295,8 +420,10 @@ private fun scaleTargetShape(
             TargetShape.Rectangle(
                 widthDp =
                     shape.widthDp.scale(),
+
                 heightDp =
                     shape.heightDp.scale(),
+
                 cornerRadiusDp =
                     shape.cornerRadiusDp.scale()
             )
@@ -306,6 +433,7 @@ private fun scaleTargetShape(
             TargetShape.Oval(
                 widthDp =
                     shape.widthDp.scale(),
+
                 heightDp =
                     shape.heightDp.scale()
             )
@@ -315,6 +443,7 @@ private fun scaleTargetShape(
             TargetShape.Capsule(
                 widthDp =
                     shape.widthDp.scale(),
+
                 heightDp =
                     shape.heightDp.scale()
             )
@@ -324,8 +453,10 @@ private fun scaleTargetShape(
             TargetShape.CutCornerRect(
                 widthDp =
                     shape.widthDp.scale(),
+
                 heightDp =
                     shape.heightDp.scale(),
+
                 cutSizeDp =
                     shape.cutSizeDp.scale()
             )
@@ -335,8 +466,10 @@ private fun scaleTargetShape(
             TargetShape.Star(
                 radiusDp =
                     shape.radiusDp.scale(),
+
                 innerRadiusRatio =
                     shape.innerRadiusRatio,
+
                 points =
                     shape.points
             )
@@ -346,6 +479,7 @@ private fun scaleTargetShape(
             TargetShape.Triangle(
                 widthDp =
                     shape.widthDp.scale(),
+
                 heightDp =
                     shape.heightDp.scale()
             )
@@ -355,6 +489,7 @@ private fun scaleTargetShape(
             TargetShape.Polygon(
                 radiusDp =
                     shape.radiusDp.scale(),
+
                 sides =
                     shape.sides
             )

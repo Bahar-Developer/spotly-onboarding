@@ -9,7 +9,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
-import com.golrang.zap.zapdriver.core.guid.SpotlyGuideManager
+import com.spotly.onboarding.ui.SpotlyGuideManager
 import com.smart.kahkashan.spotlyonboardinglibrary.ui.theme.SpotlyOnboardingLibraryTheme
 import com.spotly.onboarding.theme.SpotlyColors
 
