@@ -10,7 +10,7 @@ plugins {
 android {
     namespace = "com.spotly.onboarding"
     compileSdk {
-        version = release(37)
+        version = release(36)
     }
 
     defaultConfig {
@@ -30,7 +30,7 @@ mavenPublishing {
     coordinates(
         groupId = "io.github.bahar-developer",
         artifactId = "spotly-onboarding",
-        version = "1.1.3"
+        version = "1.1.4"
     )
 
     pom {
