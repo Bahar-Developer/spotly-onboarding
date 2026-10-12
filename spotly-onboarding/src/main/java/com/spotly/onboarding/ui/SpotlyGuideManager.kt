@@ -194,8 +194,10 @@ fun SpotlyGuideManager(
      * IMAGE SCROLL
      * ---------------------------------------------------------
      *
-     * با تغییر step، یا محاسبه هوشمند بر اساس موقعیت اسپات‌لایت
-     * یا استفاده از نسبت مشخص‌شده، تصویر به position مربوطه اسکرول می‌شود.
+     * تشخیص هوشمند ارتفاع اسپات‌لایت:
+     * اگر ارتفاع اسپات‌لایت/بخش مورد نظر بزرگ باشد (مثلاً کل صفحه یا بیشتر را بگیرد)،
+     * صفحه در ابتدای اسپات‌لایت (سر اسپات‌لایت) قرار می‌گیرد تا کاربر خودش با اسکرول انتهای آن را ببیند.
+     * اگر ارتفاع کوچک یا معمولی باشد، طبق روال قبل مرکز‌چین می‌شود.
      */
     LaunchedEffect(
         currentStepIndex,
@@ -207,12 +209,34 @@ fun SpotlyGuideManager(
             val baseWidthPx = with(density) { 360.dp.toPx() }
             val scale = imageSize.width.toFloat() / baseWidthPx
             val firstSpotlight = currentStep.spotlights.first()
-            val targetYPx = with(density) { firstSpotlight.offsetDp.y.toPx() } * scale
             
-            // مرکز‌چین کردن اسپات‌لایت در صفحه
+            // مختصات Y در فایل نمونه، مرکز مستطیل است (یا مرکز شکل)
+            val centerYPx = with(density) { firstSpotlight.offsetDp.y.toPx() } * scale
+            
+            // محاسبه تقریبی ارتفاع اسپات‌لایت
+            val spotlightHeightPx = when (val shape = firstSpotlight.shape) {
+                is TargetShape.RoundedRect -> with(density) { shape.heightDp.toPx() } * scale
+                is TargetShape.Rectangle -> with(density) { shape.heightDp.toPx() } * scale
+                is TargetShape.Circle -> with(density) { (shape.radiusDp * 2).toPx() } * scale
+                is TargetShape.Oval -> with(density) { shape.heightDp.toPx() } * scale
+                is TargetShape.Capsule -> with(density) { shape.heightDp.toPx() } * scale
+                else -> 100f * scale
+            }
+
+            // از آنجا که offsetDp.y در مدل شما معمولاً مرکز شکل (Center) را نشان می‌دهد،
+            // سر واقعی اسپات‌لایت (بالای کادر) برابر است با: مرکز منهای نصف ارتفاع
+            val topYPx = centerYPx - (spotlightHeightPx / 2f)
+
             val viewportHeightPx = scrollState.viewportSize.toFloat()
+            
             if (viewportHeightPx > 0f) {
-                (targetYPx - (viewportHeightPx / 3f)).toInt()
+                // اگر ارتفاع اسپات‌لایت بزرگ است، صفحه را دقیقاً روی سر اسپات‌لایت (بالای آن) تنظیم می‌کنیم
+                if (spotlightHeightPx > (viewportHeightPx * 0.4f)) {
+                    (topYPx - 32f).toInt() // کمی پدینگ در بالا برای زیبایی
+                } else {
+                    // در غیر این صورت طبق روال قبل مرکز‌چین می‌شود
+                    (centerYPx - (viewportHeightPx / 3f)).toInt()
+                }
             } else {
                 (scrollState.maxValue * currentStep.imageScrollYRatio.coerceIn(0f, 1f)).toInt()
             }
@@ -416,6 +440,8 @@ fun SpotlyGuideManager(
         ) {
 
             val contentData = SpotlyBottomContentData(
+                title = currentStep.title,
+                description = currentStep.description,
                 step = currentStep,
                 progress = (currentStepIndex + 1f) / steps.size,
                 isFirstStep = isFirstStep,

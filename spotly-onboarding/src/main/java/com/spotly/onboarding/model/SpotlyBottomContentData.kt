@@ -7,6 +7,8 @@ import com.spotly.onboarding.theme.SpotlyColors
  * in the Spotly guide.
  */
 data class SpotlyBottomContentData(
+    val title: String,
+    val description: String,
     val step: GuideStep,
     val progress: Float,
     val isFirstStep: Boolean,
