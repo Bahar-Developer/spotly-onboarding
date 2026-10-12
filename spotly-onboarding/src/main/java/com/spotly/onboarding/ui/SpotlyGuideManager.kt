@@ -222,36 +222,38 @@ fun SpotlyGuideManager(
      * IMAGE SCROLL
      * ---------------------------------------------------------
      *
-     * با تغییر step،
-     * تصویر به position مربوط به آن step می‌رود.
+     * با تغییر step، یا محاسبه هوشمند بر اساس موقعیت اسپات‌لایت
+     * یا استفاده از نسبت مشخص‌شده، تصویر به position مربوطه اسکرول می‌شود.
      */
     LaunchedEffect(
         currentStepIndex,
-        currentStep.imageScrollYRatio
+        currentStep.imageScrollYRatio,
+        currentStep.spotlights,
+        imageSize
     ) {
+        val targetScrollPx = if (currentStep.spotlights.isNotEmpty() && imageSize.width > 0) {
+            val baseWidthPx = with(density) { 360.dp.toPx() }
+            val scale = imageSize.width.toFloat() / baseWidthPx
+            val firstSpotlight = currentStep.spotlights.first()
+            val targetYPx = with(density) { firstSpotlight.offsetDp.y.toPx() } * scale
+            
+            // مرکز‌چین کردن اسپات‌لایت در صفحه
+            val viewportHeightPx = scrollState.viewportSize.toFloat()
+            if (viewportHeightPx > 0f) {
+                (targetYPx - (viewportHeightPx / 3f)).toInt()
+            } else {
+                (scrollState.maxValue * currentStep.imageScrollYRatio.coerceIn(0f, 1f)).toInt()
+            }
+        } else {
+            (scrollState.maxValue * currentStep.imageScrollYRatio.coerceIn(0f, 1f)).toInt()
+        }
 
-        val targetScrollPx =
-            (
-                    scrollState.maxValue *
-                            currentStep.imageScrollYRatio
-                                .coerceIn(0f, 1f)
-                    ).toInt()
-
-
-        scrollState.animateScrollTo(
-
-            value =
-                targetScrollPx.coerceIn(
-                    0,
-                    scrollState.maxValue
-                ),
-
-            animationSpec =
-                spring(
-                    stiffness =
-                        Spring.StiffnessLow
-                )
-        )
+        if (scrollState.maxValue > 0) {
+            scrollState.animateScrollTo(
+                value = targetScrollPx.coerceIn(0, scrollState.maxValue),
+                animationSpec = spring(stiffness = Spring.StiffnessLow)
+            )
+        }
     }
 
 

@@ -29,7 +29,7 @@ fun CustomSampleBottomContent(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp, vertical = 40.dp),
+           ,
         contentAlignment = Alignment.BottomCenter
     ) {
         Card(
