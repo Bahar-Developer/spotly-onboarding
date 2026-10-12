@@ -6,13 +6,13 @@ plugins {
 android {
     namespace = "com.smart.kahkashan.spotlyonboardinglibrary"
     compileSdk {
-        version = release(37)
+        version = release(36)
     }
 
     defaultConfig {
         applicationId = "com.smart.kahkashan.spotlyonboardinglibrary"
         minSdk = 23
-        targetSdk = 37
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
