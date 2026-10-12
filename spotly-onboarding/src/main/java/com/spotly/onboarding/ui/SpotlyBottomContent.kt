@@ -1,4 +1,4 @@
-package com.golrang.zap.zapdriver.core.guid
+package com.spotly.onboarding.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.spotly.onboarding.theme.SpotlyColors
 
 @Composable
-internal fun SpotlyBottomContent(
+fun SpotlyBottomContent(
     title: String,
     description: String,
     progress: Float,

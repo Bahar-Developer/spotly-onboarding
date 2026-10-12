@@ -65,8 +65,9 @@ fun SpotlyDemoScreen() {
                 buttonBackgroundColor = Color(0xFFFFEB3B),
                 buttonTextColor = Color(0xFF3200EE)
             ),
-
-
+            bottomContent = { data ->
+                CustomSampleBottomContent(data = data)
+            }
         )
     }
 }

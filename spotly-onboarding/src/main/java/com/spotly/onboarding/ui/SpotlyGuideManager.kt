@@ -29,10 +29,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import com.golrang.zap.zapdriver.core.guid.SpotlyBottomContent
 import com.spotly.onboarding.model.GuideStep
 import com.spotly.onboarding.model.SpotlightShape
 import com.spotly.onboarding.model.TargetShape
+import com.spotly.onboarding.model.SpotlyBottomContentData
 import com.spotly.onboarding.theme.SpotlyColors
 import com.spotly.onboarding.ui.MorphingMultiSpotlightOverlay
 
@@ -53,7 +53,21 @@ fun SpotlyGuideManager(
 
     modifier: Modifier = Modifier,
 
-    colors: SpotlyColors = SpotlyColors()
+    colors: SpotlyColors = SpotlyColors(),
+    bottomContent: @Composable (SpotlyBottomContentData) -> Unit = { data ->
+        SpotlyBottomContent(
+            title = data.step.title,
+            description = data.step.description,
+            progress = data.progress,
+            isFirstStep = data.isFirstStep,
+            isLastStep = data.isLastStep,
+            showNavigationButtons = true,
+            onNext = data.onNext,
+            onSkipOrFinish = data.onSkipOrFinish,
+            onPreviousStep = data.onPrevious,
+            colors = data.colors
+        )
+    }
 ) {
 
     /*
@@ -352,7 +366,7 @@ fun SpotlyGuideManager(
                     .clipToBounds()
                     .verticalScroll(
                         state = scrollState,
-                        enabled = false
+                        enabled = true
                     )
         ) {
 
@@ -427,160 +441,56 @@ fun SpotlyGuideManager(
                 Modifier.fillMaxSize()
         ) {
 
-            SpotlyBottomContent(
-
-                title =
-                    currentStep.title,
-
-                description =
-                    currentStep.description,
-
-                progress =
-                    (currentStepIndex + 1f) /
-                            steps.size,
-
-                isFirstStep =
-                    isFirstStep,
-
-                isLastStep =
-                    isLastStep,
-
-                /*
-                 * دکمه‌ها مستقل از showDescription هستند.
-                 */
-                showNavigationButtons =
-                    true,
-
-
-                /*
-                 * -------------------------------------------------
-                 * NEXT
-                 * -------------------------------------------------
-                 */
+            val contentData = SpotlyBottomContentData(
+                step = currentStep,
+                progress = (currentStepIndex + 1f) / steps.size,
+                isFirstStep = isFirstStep,
+                isLastStep = isLastStep,
                 onNext = {
-
                     handleManualStepChange(
-
                         showBottomContent = {
                             showBottomContent = false
                         },
-
                         action = {
                             onNextStep()
                         }
                     )
                 },
-
-
-                /*
-                 * -------------------------------------------------
-                 * SKIP / FINISH
-                 * -------------------------------------------------
-                 */
-                onSkipOrFinish = {
-
+                onPrevious = {
                     handleManualStepChange(
-
                         showBottomContent = {
                             showBottomContent = false
                         },
-
                         action = {
-                            onSkipOrFinish()
-                        }
-                    )
-                },
-
-
-                /*
-                 * -------------------------------------------------
-                 * PREVIOUS
-                 * -------------------------------------------------
-                 *
-                 * این قسمت منطق اصلی است.
-                 *
-                 * مثال:
-                 *
-                 * 0 normal
-                 * 1 normal
-                 * 2 auto
-                 * 3 auto
-                 * 4 auto
-                 * 5 auto
-                 * 6 normal
-                 *
-                 * current = 6
-                 *
-                 * Previous:
-                 *
-                 * 6 -> 2
-                 *
-                 * current = 5
-                 *
-                 * Previous:
-                 *
-                 * 5 -> 2
-                 */
-                onPreviousStep = {
-
-                    handleManualStepChange(
-
-                        showBottomContent = {
-                            showBottomContent = false
-                        },
-
-                        action = {
-
-                            /*
-                             * مقصد Previous را پیدا کن.
-                             */
                             val previousIndex =
                                 findPreviousStepIndex(
-                                    steps =
-                                        steps,
-
-                                    currentIndex =
-                                        currentStepIndex
+                                    steps = steps,
+                                    currentIndex = currentStepIndex
                                 )
 
-
-                            /*
-                             * چند step باید عقب برویم؟
-                             *
-                             * مثال:
-                             *
-                             * current = 6
-                             * target = 2
-                             *
-                             * result = 4
-                             */
                             val stepsToGoBack =
-                                currentStepIndex -
-                                        previousIndex
+                                currentStepIndex - previousIndex
 
-
-                            /*
-                             * چون API فعلی Parent
-                             * فقط currentIndex-- دارد،
-                             * به همان تعداد onPreviousStep
-                             * را صدا می‌زنیم.
-                             *
-                             * 6 -> 5 -> 4 -> 3 -> 2
-                             */
-                            repeat(
-                                stepsToGoBack
-                            ) {
-
+                            repeat(stepsToGoBack) {
                                 onPreviousStep()
                             }
                         }
                     )
                 },
-
-
-                colors =
-                    colors
+                onSkipOrFinish = {
+                    handleManualStepChange(
+                        showBottomContent = {
+                            showBottomContent = false
+                        },
+                        action = {
+                            onSkipOrFinish()
+                        }
+                    )
+                },
+                colors = colors
             )
+
+            bottomContent(contentData)
         }
     }
 }
