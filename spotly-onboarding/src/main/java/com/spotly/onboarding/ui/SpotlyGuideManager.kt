@@ -130,20 +130,6 @@ fun SpotlyGuideManager(
      * ---------------------------------------------------------
      * AUTO ADVANCE
      * ---------------------------------------------------------
-     *
-     * اگر step Auto باشد:
-     *
-     *     2 -> بعد از تایمر -> 3
-     *     3 -> بعد از تایمر -> 4
-     *     4 -> بعد از تایمر -> 5
-     *     5 -> بعد از تایمر -> 6
-     *
-     * وقتی Previous از 6 زده شود:
-     *
-     *     6 -> 2
-     *
-     * و چون currentStepIndex تغییر کرده،
-     * LaunchedEffect برای step 2 دوباره اجرا می‌شود.
      */
     LaunchedEffect(
         currentStepIndex,
@@ -166,20 +152,6 @@ fun SpotlyGuideManager(
 
 
         /*
-         * fade out
-         */
-        showBottomContent = false
-
-
-        /*
-         * صبر برای تمام شدن fade
-         */
-        delay(
-            BOTTOM_CONTENT_ANIMATION_DURATION.toLong()
-        )
-
-
-        /*
          * اگر آخرین step هستیم،
          * onboarding تمام شود.
          */
@@ -190,7 +162,7 @@ fun SpotlyGuideManager(
         } else {
 
             /*
-             * step بعدی
+             * step بعدی (بدون ست کردن دستی showBottomContent = false)
              */
             onNextStep()
         }
