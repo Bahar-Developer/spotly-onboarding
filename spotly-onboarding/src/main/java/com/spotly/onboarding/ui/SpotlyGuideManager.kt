@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.spotly.onboarding.model.GuideStep
+import com.spotly.onboarding.model.ProgressMode
 import com.spotly.onboarding.model.SpotlightShape
 import com.spotly.onboarding.model.TargetShape
 import com.spotly.onboarding.model.SpotlyBottomContentData
@@ -156,15 +157,31 @@ fun SpotlyGuideManager(
          * onboarding تمام شود.
          */
         if (currentStepIndex == steps.lastIndex) {
-
             onSkipOrFinish()
-
         } else {
-
             /*
-             * step بعدی (بدون ست کردن دستی showBottomContent = false)
+             * بررسی برای لوپ شدن گروه
              */
-            onNextStep()
+            if (currentStep.isLooping && currentStep.groupId != null) {
+                val nextStep = steps.getOrNull(currentStepIndex + 1)
+                if (nextStep?.groupId != currentStep.groupId) {
+                    // رسیدیم به انتهای گروه و باید لوپ کنیم
+                    val firstIndexInGroup = steps.indexOfFirst { it.groupId == currentStep.groupId }
+                    if (firstIndexInGroup != -1) {
+                        // پرش به ایندکس شروع گروه (تکرار)
+                        val stepsToGoBack = currentStepIndex - firstIndexInGroup
+                        repeat(stepsToGoBack) {
+                            onPreviousStep()
+                        }
+                    } else {
+                        onNextStep()
+                    }
+                } else {
+                    onNextStep()
+                }
+            } else {
+                onNextStep()
+            }
         }
     }
 
@@ -439,11 +456,24 @@ fun SpotlyGuideManager(
                 Modifier.fillMaxSize()
         ) {
 
+            val progressValue = when (currentStep.progressMode) {
+                ProgressMode.GROUP_STATIC -> {
+                    val firstIndexInGroup = steps.indexOfFirst { it.groupId == currentStep.groupId }
+                    (firstIndexInGroup + 1f) / steps.size
+                }
+                ProgressMode.GROUP_INCREMENTAL -> {
+                    val groupSteps = steps.filter { it.groupId == currentStep.groupId && it.groupId != null }
+                    val indexInGroup = groupSteps.indexOf(currentStep)
+                    (indexInGroup + 1f) / (if (groupSteps.isEmpty()) 1 else groupSteps.size)
+                }
+                else -> (currentStepIndex + 1f) / steps.size
+            }
+
             val contentData = SpotlyBottomContentData(
                 title = currentStep.title,
                 description = currentStep.description,
                 step = currentStep,
-                progress = (currentStepIndex + 1f) / steps.size,
+                progress = progressValue,
                 isFirstStep = isFirstStep,
                 isLastStep = isLastStep,
                 onNext = {

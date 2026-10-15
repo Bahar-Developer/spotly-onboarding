@@ -4,6 +4,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.smart.kahkashan.spotlyonboardinglibrary.R
 import com.spotly.onboarding.model.GuideStep
+import com.spotly.onboarding.model.ProgressMode
 import com.spotly.onboarding.model.SpotlightShape
 import com.spotly.onboarding.model.TargetShape
 
@@ -52,6 +53,8 @@ object OnboardingSample {
                         )
                     )
                 ),
+                groupId = "1",
+                progressMode = ProgressMode.GROUP_STATIC,
                 isAutoAdvance = true
             ),
             GuideStep(
@@ -69,6 +72,8 @@ object OnboardingSample {
                         )
                     )
                 ),
+                groupId = "1",
+                progressMode = ProgressMode.GROUP_STATIC,
                 isAutoAdvance = true,
 
             ),
@@ -87,6 +92,8 @@ object OnboardingSample {
                         )
                     )
                 ),
+                groupId = "1",
+                progressMode = ProgressMode.GROUP_STATIC,
                 isAutoAdvance = true,
                 autoAdvanceDurationMillis= 2000L
             ),
@@ -105,7 +112,10 @@ object OnboardingSample {
                         )
                     )
                 ),
+                groupId = "1",
                 isAutoAdvance = true,
+                isLooping = true,
+                progressMode = ProgressMode.GROUP_STATIC,
 
             ),
             GuideStep(

@@ -27,5 +27,21 @@ data class GuideStep(
      * Duration before automatically moving
      * to the next step.
      */
-    val autoAdvanceDurationMillis: Long = 3000L
+    val autoAdvanceDurationMillis: Long = 3000L,
+
+    /**
+     * Optional ID to group steps logically together.
+     * Steps with the same [groupId] will be treated as one logical step.
+     */
+    val groupId: String? = null,
+
+    val progressMode: ProgressMode = ProgressMode.INDIVIDUAL,
+
+    val isLooping: Boolean = false
 )
+
+enum class ProgressMode {
+    INDIVIDUAL,
+    GROUP_INCREMENTAL,
+    GROUP_STATIC
+}
