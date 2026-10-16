@@ -1,5 +1,6 @@
 package com.smart.kahkashan.spotlyonboardinglibrary.sample
 
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.smart.kahkashan.spotlyonboardinglibrary.R
@@ -11,7 +12,8 @@ import com.spotly.onboarding.model.TargetShape
 object OnboardingSample {
 
     fun getSampleSteps(
-        screenWidthDp: Float
+        screenWidthDp: Float,
+        liveUiRect: Rect? = null
     ): List<GuideStep> {
         val centerX = 180.dp
         val fullWidth = 360.dp
@@ -172,6 +174,21 @@ object OnboardingSample {
                             widthDp = fullWidth,
                             heightDp = 67.dp,
                             cornerRadiusDp = 999.dp
+                        )
+                    )
+                )
+            ),
+            GuideStep(
+                title = "راهنمای UI زنده",
+                description = "این مرحله مستقیماً روی یک المان واقعی در UI قرار می‌گیرد.",
+                targetRect = liveUiRect ?: Rect(100f, 400f, 400f, 500f),
+                spotlights = listOf(
+                    SpotlightShape(
+                        offsetDp = DpOffset(x = 0.dp, y = 0.dp),
+                        shape = TargetShape.RoundedRect(
+                            widthDp = 220.dp,
+                            heightDp = 52.dp,
+                            cornerRadiusDp = 16.dp
                         )
                     )
                 )

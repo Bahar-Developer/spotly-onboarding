@@ -280,10 +280,38 @@ fun SpotlyGuideManager(
             currentStep.spotlights,
             imageSize,
             scrollState.value,
-            density
+            density,
+            currentStep.targetRect
         ) {
 
-            if (imageSize.width == 0) {
+            if (currentStep.targetRect != null) {
+                // Live UI Mode: Relative to targetRect
+                val rect = currentStep.targetRect
+                if (currentStep.spotlights.isEmpty()) {
+                    listOf(
+                        SpotlightShape(
+                            offsetDp = DpOffset(
+                                x = with(density) { rect.center.x.toDp() },
+                                y = with(density) { rect.center.y.toDp() }
+                            ),
+                            shape = TargetShape.RoundedRect(
+                                widthDp = with(density) { rect.width.toDp() },
+                                heightDp = with(density) { rect.height.toDp() },
+                                cornerRadiusDp = 12.dp
+                            )
+                        )
+                    )
+                } else {
+                    currentStep.spotlights.map { item ->
+                        item.copy(
+                            offsetDp = DpOffset(
+                                x = with(density) { (rect.center.x + item.offsetDp.x.toPx()).toDp() },
+                                y = with(density) { (rect.center.y + item.offsetDp.y.toPx()).toDp() }
+                            )
+                        )
+                    }
+                }
+            } else if (imageSize.width == 0) {
 
                 currentStep.spotlights
 
@@ -373,36 +401,37 @@ fun SpotlyGuideManager(
          * ONBOARDING IMAGE
          * -----------------------------------------------------
          */
-        Column(
-
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .clipToBounds()
-                    .verticalScroll(
-                        state = scrollState,
-                        enabled = true
-                    )
-        ) {
-
-            CustomImage(
-
-                id =
-                    currentStep.imageRes,
-
+        if (currentStep.targetRect == null) {
+            Column(
                 modifier =
                     Modifier
-                        .fillMaxWidth()
-                        .onGloballyPositioned {
-                                coordinates ->
+                        .fillMaxSize()
+                        .clipToBounds()
+                        .verticalScroll(
+                            state = scrollState,
+                            enabled = true
+                        )
+            ) {
 
-                            imageSize =
-                                coordinates.size
-                        },
+                CustomImage(
 
-                contentScale =
-                    ContentScale.FillWidth
-            )
+                    id =
+                        currentStep.imageRes,
+
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .onGloballyPositioned {
+                                    coordinates ->
+
+                                imageSize =
+                                    coordinates.size
+                            },
+
+                    contentScale =
+                        ContentScale.FillWidth
+                )
+            }
         }
 
 
@@ -818,11 +847,13 @@ private fun scaleTargetShape(
 }
 
 @Composable
-fun CustomImage(modifier: Modifier = Modifier, id: Int, contentScale:ContentScale= ContentScale.FillBounds) {
-    Image(
-        painter = painterResource(id = id),
-        contentDescription = "",
-        modifier = modifier,
-        contentScale = contentScale,)
-
+fun CustomImage(modifier: Modifier = Modifier, id: Int, contentScale: ContentScale = ContentScale.FillBounds) {
+    if (id != 0) {
+        Image(
+            painter = painterResource(id = id),
+            contentDescription = "",
+            modifier = modifier,
+            contentScale = contentScale
+        )
+    }
 }

@@ -1,6 +1,7 @@
 package com.spotly.onboarding.model
 
 import androidx.annotation.DrawableRes
+import androidx.compose.ui.geometry.Rect
 
 
 
@@ -9,7 +10,9 @@ data class GuideStep(
     val description: String,
 
     @DrawableRes
-    val imageRes: Int,
+    val imageRes: Int = 0,
+
+    val targetRect: Rect? = null,
 
     val spotlights: List<SpotlightShape> = emptyList(),
 

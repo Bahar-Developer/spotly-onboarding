@@ -30,7 +30,7 @@ mavenPublishing {
     coordinates(
         groupId = "io.github.bahar-developer",
         artifactId = "spotly-onboarding",
-        version = "1.2.0"
+        version = "3.0.0"
     )
 
     pom {
