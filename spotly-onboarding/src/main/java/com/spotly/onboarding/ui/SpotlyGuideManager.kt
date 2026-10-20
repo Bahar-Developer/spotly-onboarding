@@ -40,14 +40,18 @@ import com.spotly.onboarding.ui.MorphingMultiSpotlightOverlay
 import kotlinx.coroutines.delay
 
 
+enum class OnboardingAction {
+    PAGE_VIEW,
+    NEXT_CLICK,
+    PREVIOUS_CLICK,
+    SKIP_CLICK,
+    FINISH_CLICK
+}
+
 @Composable
 fun SpotlyGuideManager(
     steps: List<GuideStep>,
     currentStepIndex: Int,
-
-    /*
-     * API فعلی شما بدون تغییر باقی می‌ماند.
-     */
     onNextStep: () -> Unit,
     onSkipOrFinish: () -> Unit,
     onPreviousStep: () -> Unit,
@@ -55,6 +59,7 @@ fun SpotlyGuideManager(
     modifier: Modifier = Modifier,
 
     colors: SpotlyColors = SpotlyColors(),
+    onTrackingEvent: ((trackingTag: String, action: OnboardingAction) -> Unit)? = null,
     bottomContent: @Composable (SpotlyBottomContentData) -> Unit = { data ->
         SpotlyBottomContent(
             title = data.step.title,
@@ -124,6 +129,10 @@ fun SpotlyGuideManager(
 
         showBottomContent =
             currentStep.showDescription
+
+        if (currentStep.trackingTag.isNotEmpty()) {
+            onTrackingEvent?.invoke(currentStep.trackingTag, OnboardingAction.PAGE_VIEW)
+        }
     }
 
 
@@ -511,6 +520,9 @@ fun SpotlyGuideManager(
                 isFirstStep = isFirstStep,
                 isLastStep = isLastStep,
                 onNext = {
+                    if (currentStep.trackingTag.isNotEmpty()) {
+                        onTrackingEvent?.invoke(currentStep.trackingTag, OnboardingAction.NEXT_CLICK)
+                    }
                     handleManualStepChange(
                         showBottomContent = {
                             showBottomContent = false
@@ -540,6 +552,9 @@ fun SpotlyGuideManager(
                     )
                 },
                 onPrevious = {
+                    if (currentStep.trackingTag.isNotEmpty()) {
+                        onTrackingEvent?.invoke(currentStep.trackingTag, OnboardingAction.PREVIOUS_CLICK)
+                    }
                     handleManualStepChange(
                         showBottomContent = {
                             showBottomContent = false
@@ -561,6 +576,10 @@ fun SpotlyGuideManager(
                     )
                 },
                 onSkipOrFinish = {
+                    val eventType = if (isLastStep) OnboardingAction.FINISH_CLICK else OnboardingAction.SKIP_CLICK
+                    if (currentStep.trackingTag.isNotEmpty()) {
+                        onTrackingEvent?.invoke(currentStep.trackingTag, eventType)
+                    }
                     handleManualStepChange(
                         showBottomContent = {
                             showBottomContent = false

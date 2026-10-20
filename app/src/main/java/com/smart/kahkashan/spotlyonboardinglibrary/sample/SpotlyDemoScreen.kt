@@ -79,8 +79,10 @@ fun SpotlyDemoScreen() {
             GuideStep(
                 title = "انتخاب محدودهٔ کاری",
                 description = "ابتدا محدوده\u200Cای را که می\u200Cخواهید در آن فعالیت کنید، انتخاب کنید.",
+                trackingTag = "shift-onboarding-polygon_page-view" ,
                 imageRes = R.drawable.img_shift_onboarding_step1,
                 spotlights = listOf(SpotlightShape(offsetDp = DpOffset(x = 150.dp, y = 460.dp), shape = TargetShape.Circle(radiusDp = 190.dp)))
+
             ),
             GuideStep(
                 title = "پیدا کردن شیفت مناسب",

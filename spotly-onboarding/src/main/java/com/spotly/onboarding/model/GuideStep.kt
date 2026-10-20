@@ -8,7 +8,7 @@ import androidx.compose.ui.geometry.Rect
 data class GuideStep(
     val title: String,
     val description: String,
-
+    val trackingTag: String = "",
     @DrawableRes
     val imageRes: Int = 0,
 
