@@ -118,10 +118,6 @@ fun SpotlyGuideManager(
     }
 
 
-    /*
-     * هر بار step عوض شد،
-     * visibility مربوط به step جدید را تنظیم کن.
-     */
     LaunchedEffect(
         currentStepIndex,
         currentStep.showDescription
@@ -152,32 +148,22 @@ fun SpotlyGuideManager(
         }
 
 
-        /*
-         * صبر برای تایمر step فعلی
-         */
         delay(
             currentStep.autoAdvanceDurationMillis
                 .coerceAtLeast(1L)
         )
 
-
-        /*
-         * اگر آخرین step هستیم،
-         * onboarding تمام شود.
-         */
         if (currentStepIndex == steps.lastIndex) {
             onSkipOrFinish()
         } else {
-            /*
-             * بررسی برای لوپ شدن گروه
-             */
+
             if (currentStep.isLooping && currentStep.groupId != null) {
                 val nextStep = steps.getOrNull(currentStepIndex + 1)
                 if (nextStep?.groupId != currentStep.groupId) {
-                    // رسیدیم به انتهای گروه و باید لوپ کنیم
+
                     val firstIndexInGroup = steps.indexOfFirst { it.groupId == currentStep.groupId }
                     if (firstIndexInGroup != -1) {
-                        // پرش به ایندکس شروع گروه (تکرار)
+
                         val stepsToGoBack = currentStepIndex - firstIndexInGroup
                         repeat(stepsToGoBack) {
                             onPreviousStep()
