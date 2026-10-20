@@ -8,11 +8,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.smart.kahkashan.spotlyonboardinglibrary.R
 import com.spotly.onboarding.model.SpotlyBottomContentData
 
 /**
@@ -27,58 +26,60 @@ fun CustomSampleBottomContent(
     val colors = data.colors
 
     Box(
-        modifier = modifier
-            .fillMaxSize()
-           ,
+        modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.BottomCenter
     ) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
+                .fillMaxHeight(0.18f)
                 .navigationBarsPadding(),
-            shape = RoundedCornerShape(32.dp),
+            shape = RectangleShape,
             colors = CardDefaults.cardColors(
-                containerColor = colors.containerBackground.copy(alpha = 0.98f)
+                containerColor = colors.containerBackground
             ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 24.dp)
         ) {
             Column(
-                modifier = Modifier.padding(28.dp)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 20.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                // Slim Progress Indicator
-                LinearProgressIndicator(
-                    progress = { data.progress },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(6.dp)
-                        .clip(CircleShape),
-                    color = colors.progressColor,
-                    trackColor = colors.progressColor.copy(alpha = 0.15f),
-                )
+                Column {
+                    // Slim Progress Indicator
+                    LinearProgressIndicator(
+                        progress = { data.progress },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(4.dp)
+                            .clip(CircleShape),
+                        color = colors.progressColor,
+                        trackColor = colors.progressColor.copy(alpha = 0.2f),
+                    )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                // Title
-                Text(
-                    text = data.step.title,
-                    color = colors.titleColor,
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    lineHeight = 30.sp
-                )
+                    // Title
+                    Text(
+                        text = data.step.title,
+                        color = colors.titleColor,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        lineHeight = 24.sp
+                    )
 
-                Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
 
-                // Description
-                Text(
-                    text = data.step.description,
-                    color = colors.descriptionColor.copy(alpha = 0.85f),
-                    fontSize = 16.sp,
-                    lineHeight = 24.sp,
-                    fontWeight = FontWeight.Medium
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
+                    // Description
+                    Text(
+                        text = data.step.description,
+                        color = colors.descriptionColor,
+                        fontSize = 13.sp,
+                        lineHeight = 18.sp,
+                        fontWeight = FontWeight.Normal
+                    )
+                }
 
                 // Action Row
                 Row(
@@ -87,24 +88,28 @@ fun CustomSampleBottomContent(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     // Left Action (Previous or Skip)
-                    Box(modifier = Modifier.weight(1f)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         if (!data.isFirstStep) {
                             TextButton(
                                 onClick = data.onPrevious,
                                 colors = ButtonDefaults.textButtonColors(
-                                    contentColor = colors.titleColor.copy(alpha = 0.7f)
-                                )
+                                    contentColor = colors.titleColor.copy(alpha = 0.8f)
+                                ),
+                                contentPadding = PaddingValues(4.dp)
                             ) {
-                                Text("قبلی", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                                Text("قبلی", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                             }
                         } else if (!data.isLastStep) {
                             TextButton(
                                 onClick = data.onSkipOrFinish,
                                 colors = ButtonDefaults.textButtonColors(
-                                    contentColor = colors.titleColor.copy(alpha = 0.5f)
-                                )
+                                    contentColor = colors.titleColor.copy(alpha = 0.7f)
+                                ),
+                                contentPadding = PaddingValues(4.dp)
                             ) {
-                                Text("رد کردن", fontSize = 15.sp, fontWeight = FontWeight.Normal)
+                                Text("رد کردن", fontSize = 14.sp, fontWeight = FontWeight.Medium)
                             }
                         }
                     }
@@ -114,32 +119,21 @@ fun CustomSampleBottomContent(
                         onClick = {
                             if (data.isLastStep) data.onSkipOrFinish() else data.onNext()
                         },
-                        modifier = Modifier.height(52.dp),
+                        modifier = Modifier
+                            .height(40.dp)
+                            .defaultMinSize(minWidth = 110.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = colors.buttonBackgroundColor,
                             contentColor = colors.buttonTextColor
                         ),
-                        shape = RoundedCornerShape(18.dp),
-                        contentPadding = PaddingValues(horizontal = 24.dp)
+                        shape = RoundedCornerShape(14.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                text = if (data.isLastStep) "شروع کنیم" else "بعدی",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp
-                            )
-                            if (!data.isLastStep) {
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_launcher_foreground) ,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                        }
+                        Text(
+                            text = if (data.isLastStep) "پایان" else "بعدی",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
                     }
                 }
             }

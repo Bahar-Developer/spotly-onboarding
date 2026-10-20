@@ -18,21 +18,11 @@ object OnboardingSample {
         val fullWidth = 360.dp
 
         return listOf(
+            // 1. Dashboard Live UI Step (Tab 1)
             GuideStep(
-                title = "انتخاب محدودهٔ کاری",
-                description = "ابتدا محدوده\u200Cای را که می\u200Cخواهید در آن فعالیت کنید، انتخاب کنید.",
-                imageRes = R.drawable.img_shift_onboarding_step1,
-                spotlights = listOf(
-                    SpotlightShape(
-                        offsetDp = DpOffset(x = 150.dp, y = 460.dp),
-                        shape = TargetShape.Circle(radiusDp = 190.dp)
-                    )
-                )
-            ),
-            GuideStep(
-                title = "صفحه خانه - جستجوی شیفت",
-                description = "این مرحله مستقیماً روی دکمه واقعی جستجوی شیفت در صفحه خانه قرار دارد.",
-                targetRect = targetRects["home_search_btn"],
+                title = "تب داشبورد - آمار و عملکرد",
+                description = "در این بخش می‌توانید خلاصه وضعیت و آمار فعالیت‌های خود را مشاهده کنید.",
+                targetRect = targetRects["dashboard_action_btn"],
                 spotlights = listOf(
                     SpotlightShape(
                         offsetDp = DpOffset(0.dp, 0.dp),
@@ -44,6 +34,35 @@ object OnboardingSample {
                     )
                 )
             ),
+            // 2. Shifts Live UI Step (Tab 2)
+            GuideStep(
+                title = "تب شیفت‌ها - فیلتر هوشمند",
+                description = "در صفحه شیفت‌ها می‌توانید فیلترهای روز و ساعت را اعمال کنید.",
+                targetRect = targetRects["shifts_filter_chip"],
+                spotlights = listOf(
+                    SpotlightShape(
+                        offsetDp = DpOffset(0.dp, 0.dp),
+                        shape = TargetShape.RoundedRect(
+                            widthDp = 220.dp,
+                            heightDp = 48.dp,
+                            cornerRadiusDp = 12.dp
+                        )
+                    )
+                )
+            ),
+            // 3. Shift Onboarding: انتخاب محدوده کاری
+            GuideStep(
+                title = "انتخاب محدودهٔ کاری",
+                description = "ابتدا محدوده\u200Cای را که می\u200Cخواهید در آن فعالیت کنید، انتخاب کنید.",
+                imageRes = R.drawable.img_shift_onboarding_step1,
+                spotlights = listOf(
+                    SpotlightShape(
+                        offsetDp = DpOffset(x = 150.dp, y = 460.dp),
+                        shape = TargetShape.Circle(radiusDp = 190.dp)
+                    )
+                )
+            ),
+            // 4. Shift Onboarding: پیدا کردن شیفت مناسب
             GuideStep(
                 title = "پیدا کردن شیفت مناسب",
                 description = "روز، ساعت و فیلترهای دلخواه را مشخص کنید تا شیفت\u200Cهای مناسب همان روز نمایش داده شوند.",
@@ -55,21 +74,7 @@ object OnboardingSample {
                     )
                 )
             ),
-            GuideStep(
-                title = "صفحه شیفت‌ها - فیلتر هوشمند",
-                description = "این مرحله مستقیماً روی دکمه واقعی فیلتر در صفحه شیفت‌ها قرار دارد.",
-                targetRect = targetRects["shifts_filter_chip"],
-                spotlights = listOf(
-                    SpotlightShape(
-                        offsetDp = DpOffset(0.dp, 0.dp),
-                        shape = TargetShape.RoundedRect(
-                            widthDp = 180.dp,
-                            heightDp = 48.dp,
-                            cornerRadiusDp = 12.dp
-                        )
-                    )
-                )
-            ),
+            // Carousel Group (وضعیت‌های شیفت)
             GuideStep(
                 title = "وضعیت های شیفت",
                 description = "هر کارت، وضعیت و میزان ظرفیت شیفت را نمایش می\u200Cدهد تا بتوانید شرایط آن را پیش از انتخاب بررسی کنید.",
@@ -168,14 +173,18 @@ object OnboardingSample {
                 imageRes = R.drawable.img_shift_onboarding_step78,
                 spotlights = listOf(
                     SpotlightShape(
-                        offsetDp = DpOffset(x = centerX, y = 320.dp),
+                        offsetDp = DpOffset(x = centerX, y = 325.dp),
                         shape = TargetShape.RoundedRect(
                             widthDp = fullWidth,
-                            heightDp = 210.dp,
+                            heightDp = 200.dp,
                             cornerRadiusDp = 0.dp
                         )
                     )
-                )
+                ),
+                groupId = "2",
+                progressMode = ProgressMode.GROUP_STATIC,
+                isAutoAdvance = true,
+                autoAdvanceDurationMillis = 2000L
             ),
             GuideStep(
                 title = "شیفت انتخاب شده",
@@ -186,7 +195,12 @@ object OnboardingSample {
                         offsetDp = DpOffset(x = 40.dp, y = 30.dp),
                         shape = TargetShape.Circle(radiusDp = 120.dp)
                     )
-                )
+                ),
+                groupId = "2",
+                autoAdvanceDurationMillis = 2000L,
+                isLooping = true,
+                isAutoAdvance = true,
+                progressMode = ProgressMode.GROUP_STATIC
             ),
             GuideStep(
                 title = "بخش آموزش",
@@ -205,7 +219,7 @@ object OnboardingSample {
             ),
             GuideStep(
                 title = "صفحه پروفایل - کارت آموزش",
-                description = "این مرحله مستقیماً روی کارت واقعی آموزش در صفحه پروفایل قرار دارد.",
+                description = "این مرحله روی کارت واقعی آموزش در صفحه پروفایل قرار دارد.",
                 targetRect = targetRects["profile_education_card"],
                 spotlights = listOf(
                     SpotlightShape(
