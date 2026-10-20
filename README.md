@@ -17,7 +17,8 @@ It allows you to create interactive product tours and feature walkthroughs by hi
 
 Spotly is designed around a declarative architecture and provides smooth animated transitions between spotlight shapes, making onboarding experiences feel natural and polished.
 
-![Spotly Onboarding Demo](media/demo.gif)
+![Spotly Onboarding Demo](media/demo2.gif)
+![Spotly Onboarding Demo](media/demo.gif) 
 
 ### Why Spotly?
 
