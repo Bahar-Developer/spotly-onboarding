@@ -485,17 +485,22 @@ fun SpotlyGuideManager(
                 Modifier.fillMaxSize()
         ) {
 
+            val mainSteps = remember(steps) { getMainSteps(steps) }
+            val currentMainGroup = mainSteps.find { currentStepIndex in it.startIndex..it.endIndex }
+            val currentMainIndex = mainSteps.indexOf(currentMainGroup).coerceAtLeast(0)
+
             val progressValue = when (currentStep.progressMode) {
                 ProgressMode.GROUP_STATIC -> {
-                    val firstIndexInGroup = steps.indexOfFirst { it.groupId == currentStep.groupId }
-                    (firstIndexInGroup + 1f) / steps.size
+                    (currentMainIndex + 1f) / mainSteps.size
                 }
                 ProgressMode.GROUP_INCREMENTAL -> {
-                    val groupSteps = steps.filter { it.groupId == currentStep.groupId && it.groupId != null }
-                    val indexInGroup = groupSteps.indexOf(currentStep)
-                    (indexInGroup + 1f) / (if (groupSteps.isEmpty()) 1 else groupSteps.size)
+                    val groupSteps = currentMainGroup?.steps ?: listOf(currentStep)
+                    val indexInGroup = groupSteps.indexOf(currentStep).coerceAtLeast(0)
+                    (indexInGroup + 1f) / groupSteps.size
                 }
-                else -> (currentStepIndex + 1f) / steps.size
+                else -> {
+                    (currentMainIndex + 1f) / mainSteps.size
+                }
             }
 
             val contentData = SpotlyBottomContentData(
@@ -511,7 +516,26 @@ fun SpotlyGuideManager(
                             showBottomContent = false
                         },
                         action = {
-                            onNextStep()
+                            val currentMainGroup = mainSteps.find { currentStepIndex in it.startIndex..it.endIndex }
+                            val currentMainIndex = mainSteps.indexOf(currentMainGroup)
+
+                            if (currentMainGroup?.groupId != null) {
+                                if (currentMainIndex < mainSteps.size - 1) {
+                                    val nextMainGroup = mainSteps[currentMainIndex + 1]
+                                    val stepsToAdvance = nextMainGroup.startIndex - currentStepIndex
+                                    repeat(stepsToAdvance) {
+                                        onNextStep()
+                                    }
+                                } else {
+                                    onSkipOrFinish()
+                                }
+                            } else {
+                                if (currentStepIndex >= steps.lastIndex) {
+                                    onSkipOrFinish()
+                                } else {
+                                    onNextStep()
+                                }
+                            }
                         }
                     )
                 },
@@ -586,77 +610,49 @@ fun SpotlyGuideManager(
  * current 2 -> 1
  * current 1 -> 0
  */
+private data class MainStepGroup(
+    val steps: List<GuideStep>,
+    val startIndex: Int,
+    val endIndex: Int,
+    val groupId: String?
+)
+
+private fun getMainSteps(steps: List<GuideStep>): List<MainStepGroup> {
+    val mainSteps = mutableListOf<MainStepGroup>()
+    var i = 0
+    while (i < steps.size) {
+        val step = steps[i]
+        if (step.groupId != null) {
+            val groupSteps = mutableListOf<GuideStep>()
+            val startIdx = i
+            val gid = step.groupId
+            while (i < steps.size && steps[i].groupId == gid) {
+                groupSteps.add(steps[i])
+                i++
+            }
+            mainSteps.add(MainStepGroup(groupSteps, startIdx, i - 1, gid))
+        } else {
+            mainSteps.add(MainStepGroup(listOf(step), i, i, null))
+            i++
+        }
+    }
+    return mainSteps
+}
+
 private fun findPreviousStepIndex(
     steps: List<GuideStep>,
     currentIndex: Int
 ): Int {
-
-    /*
-     * اولین step
-     */
     if (currentIndex <= 0) {
         return 0
     }
-
-
-    /*
-     * step قبلی
-     */
-    var previousIndex =
-        currentIndex - 1
-
-
-    /*
-     * اگر step قبلی Auto نیست،
-     * فقط یک step عقب برو.
-     *
-     * مثال:
-     *
-     * 6 normal
-     * 5 normal
-     *
-     * 6 -> 5
-     */
-    if (
-        !steps[previousIndex].isAutoAdvance
-    ) {
-
-        return previousIndex
+    val mainSteps = getMainSteps(steps)
+    val currentMainGroupIdx = mainSteps.indexOfFirst { currentIndex in it.startIndex..it.endIndex }
+    if (currentMainGroupIdx <= 0) {
+        return 0
     }
 
-
-    /*
-     * step قبلی Auto است.
-     *
-     * حالا ابتدای گروه Auto را پیدا می‌کنیم.
-     *
-     * مثلاً:
-     *
-     * 2 Auto
-     * 3 Auto
-     * 4 Auto
-     * 5 Auto
-     *
-     * از 5 شروع می‌کنیم:
-     *
-     * 5
-     * 4
-     * 3
-     * 2
-     */
-    while (
-        previousIndex > 0 &&
-        steps[previousIndex - 1].isAutoAdvance
-    ) {
-
-        previousIndex--
-    }
-
-
-    /*
-     * اولین Auto گروه
-     */
-    return previousIndex
+    return mainSteps[currentMainGroupIdx - 1].startIndex
 }
 
 

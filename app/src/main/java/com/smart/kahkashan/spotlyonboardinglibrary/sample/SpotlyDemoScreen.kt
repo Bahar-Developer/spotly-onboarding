@@ -16,6 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.smart.kahkashan.spotlyonboardinglibrary.sample.OnboardingSample.getSampleSteps
 import com.smart.kahkashan.spotlyonboardinglibrary.ui.theme.SpotlyOnboardingLibraryTheme
 import com.spotly.onboarding.model.GuideStep
 import com.spotly.onboarding.model.SpotlightShape
@@ -37,65 +38,20 @@ fun SpotlyDemoScreen() {
     var currentIndex by remember { mutableIntStateOf(0) }
     var isGuideVisible by remember { mutableStateOf(true) }
 
-    // همگام‌سازی صفحه بر اساس مرحله راهنما (Guide Step)
-    LaunchedEffect(currentIndex) {
-        currentScreen = when (currentIndex) {
-            0 -> AppScreen.HOME
-            1 -> AppScreen.SHIFTS
-            else -> AppScreen.PROFILE
+    val sampleSteps = remember(targetRects.toMap()) { getSampleSteps(targetRects) }
+
+    // همگام‌سازی صفحه بر اساس مرحله راهنما (Guide Step) - ترکیبی از استپ‌های تصویری و لایو UI
+    LaunchedEffect(currentIndex, sampleSteps) {
+        val step = sampleSteps.getOrNull(currentIndex)
+        if (step != null) {
+            currentScreen = when {
+                step.title.contains("خانه") || step.title.contains("محدوده") -> AppScreen.HOME
+                step.title.contains("پروفایل") || step.title.contains("آموزش") -> AppScreen.PROFILE
+                else -> AppScreen.SHIFTS
+            }
         }
     }
 
-    // تعریف مراحل راهنمای چند صفحه‌ای با Live UI
-    val steps = remember(targetRects.toMap()) {
-        listOf(
-            GuideStep(
-                title = "صفحه خانه - جستجوی شیفت",
-                description = "از این بخش می‌توانید شیفت‌های کاری دلخواه خود را پیدا کنید.",
-                targetRect = targetRects["home_search_btn"],
-                spotlights = listOf(
-                    SpotlightShape(
-                        offsetDp = DpOffset(0.dp, 0.dp),
-                        shape = TargetShape.RoundedRect(
-                            widthDp = 220.dp,
-                            heightDp = 50.dp,
-                            cornerRadiusDp = 14.dp
-                        )
-                    )
-                )
-            ),
-            GuideStep(
-                title = "صفحه شیفت‌ها - فیلتر هوشمند",
-                description = "در این صفحه می‌توانید شیفت‌ها را بر اساس روز و ساعت فیلتر کنید.",
-                targetRect = targetRects["shifts_filter_chip"],
-                spotlights = listOf(
-                    SpotlightShape(
-                        offsetDp = DpOffset(0.dp, 0.dp),
-                        shape = TargetShape.RoundedRect(
-                            widthDp = 180.dp,
-                            heightDp = 48.dp,
-                            cornerRadiusDp = 12.dp
-                        )
-                    )
-                )
-            ),
-            GuideStep(
-                title = "صفحه پروفایل - بخش آموزش",
-                description = "در صفحه پروفایل می‌توانید ویدیوهای آموزشی و راهنما را مشاهده کنید.",
-                targetRect = targetRects["profile_education_card"],
-                spotlights = listOf(
-                    SpotlightShape(
-                        offsetDp = DpOffset(0.dp, 0.dp),
-                        shape = TargetShape.RoundedRect(
-                            widthDp = 300.dp,
-                            heightDp = 80.dp,
-                            cornerRadiusDp = 20.dp
-                        )
-                    )
-                )
-            )
-        )
-    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         // ۱. برنامه سه صفحه‌ای اصلی به همراه Bottom Navigation Bar
@@ -106,7 +62,6 @@ fun SpotlyDemoScreen() {
                         selected = currentScreen == AppScreen.HOME,
                         onClick = {
                             currentScreen = AppScreen.HOME
-                            currentIndex = 0
                         },
                         label = { Text("خانه") },
                         icon = { Text("🏠") }
@@ -115,7 +70,6 @@ fun SpotlyDemoScreen() {
                         selected = currentScreen == AppScreen.SHIFTS,
                         onClick = {
                             currentScreen = AppScreen.SHIFTS
-                            currentIndex = 1
                         },
                         label = { Text("شیفت‌ها") },
                         icon = { Text("📋") }
@@ -124,7 +78,6 @@ fun SpotlyDemoScreen() {
                         selected = currentScreen == AppScreen.PROFILE,
                         onClick = {
                             currentScreen = AppScreen.PROFILE
-                            currentIndex = 2
                         },
                         label = { Text("پروفایل") },
                         icon = { Text("👤") }
@@ -151,14 +104,16 @@ fun SpotlyDemoScreen() {
             }
         }
 
-        // ۲. اورلی راهنما (SpotlyGuideManager) روی تمام صفحات قرار می‌گیرد
+
         if (isGuideVisible) {
             SpotlyGuideManager(
-                steps = steps,
+                steps = sampleSteps,
                 currentStepIndex = currentIndex,
                 onNextStep = {
-                    if (currentIndex < steps.lastIndex) {
+                    if (currentIndex < sampleSteps.lastIndex) {
                         currentIndex++
+                    } else {
+                        isGuideVisible = false
                     }
                 },
                 onPreviousStep = {

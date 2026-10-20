@@ -12,8 +12,7 @@ import com.spotly.onboarding.model.TargetShape
 object OnboardingSample {
 
     fun getSampleSteps(
-        screenWidthDp: Float,
-        liveUiRect: Rect? = null
+        targetRects: Map<String, Rect> = emptyMap()
     ): List<GuideStep> {
         val centerX = 180.dp
         val fullWidth = 360.dp
@@ -31,6 +30,21 @@ object OnboardingSample {
                 )
             ),
             GuideStep(
+                title = "صفحه خانه - جستجوی شیفت",
+                description = "این مرحله مستقیماً روی دکمه واقعی جستجوی شیفت در صفحه خانه قرار دارد.",
+                targetRect = targetRects["home_search_btn"],
+                spotlights = listOf(
+                    SpotlightShape(
+                        offsetDp = DpOffset(0.dp, 0.dp),
+                        shape = TargetShape.RoundedRect(
+                            widthDp = 220.dp,
+                            heightDp = 50.dp,
+                            cornerRadiusDp = 14.dp
+                        )
+                    )
+                )
+            ),
+            GuideStep(
                 title = "پیدا کردن شیفت مناسب",
                 description = "روز، ساعت و فیلترهای دلخواه را مشخص کنید تا شیفت\u200Cهای مناسب همان روز نمایش داده شوند.",
                 imageRes = R.drawable.img_shift_onboarding_step2,
@@ -38,6 +52,21 @@ object OnboardingSample {
                     SpotlightShape(
                         offsetDp = DpOffset(x = centerX, y = 60.dp),
                         shape = TargetShape.Circle(radiusDp = 220.dp)
+                    )
+                )
+            ),
+            GuideStep(
+                title = "صفحه شیفت‌ها - فیلتر هوشمند",
+                description = "این مرحله مستقیماً روی دکمه واقعی فیلتر در صفحه شیفت‌ها قرار دارد.",
+                targetRect = targetRects["shifts_filter_chip"],
+                spotlights = listOf(
+                    SpotlightShape(
+                        offsetDp = DpOffset(0.dp, 0.dp),
+                        shape = TargetShape.RoundedRect(
+                            widthDp = 180.dp,
+                            heightDp = 48.dp,
+                            cornerRadiusDp = 12.dp
+                        )
                     )
                 )
             ),
@@ -76,8 +105,7 @@ object OnboardingSample {
                 ),
                 groupId = "1",
                 progressMode = ProgressMode.GROUP_STATIC,
-                isAutoAdvance = true,
-
+                isAutoAdvance = true
             ),
             GuideStep(
                 title = "وضعیت های شیفت",
@@ -97,13 +125,13 @@ object OnboardingSample {
                 groupId = "1",
                 progressMode = ProgressMode.GROUP_STATIC,
                 isAutoAdvance = true,
-                autoAdvanceDurationMillis= 2000L
+                autoAdvanceDurationMillis = 2000L
             ),
             GuideStep(
                 title = "وضعیت های شیفت",
                 description = "هر کارت، وضعیت و میزان ظرفیت شیفت را نمایش می\u200Cدهد تا بتوانید شرایط آن را پیش از انتخاب بررسی کنید.",
                 imageRes = R.drawable.img_shift_onboarding_step345,
-                imageScrollYRatio =  1.4f,
+                imageScrollYRatio = 1.4f,
                 spotlights = listOf(
                     SpotlightShape(
                         offsetDp = DpOffset(x = centerX, y = 780.dp),
@@ -117,8 +145,7 @@ object OnboardingSample {
                 groupId = "1",
                 isAutoAdvance = true,
                 isLooping = true,
-                progressMode = ProgressMode.GROUP_STATIC,
-
+                progressMode = ProgressMode.GROUP_STATIC
             ),
             GuideStep(
                 title = "جزئیات و مزایای شیفت",
@@ -161,8 +188,6 @@ object OnboardingSample {
                     )
                 )
             ),
-
-
             GuideStep(
                 title = "بخش آموزش",
                 description = " برای توضیحات کامل\u200Cتر و تماشای ویدیوهای مربوط به شیفت هم به پروفایل بخش «آموزش» بروید.",
@@ -179,16 +204,16 @@ object OnboardingSample {
                 )
             ),
             GuideStep(
-                title = "راهنمای UI زنده",
-                description = "این مرحله مستقیماً روی یک المان واقعی در UI قرار می‌گیرد.",
-                targetRect = liveUiRect ?: Rect(100f, 400f, 400f, 500f),
+                title = "صفحه پروفایل - کارت آموزش",
+                description = "این مرحله مستقیماً روی کارت واقعی آموزش در صفحه پروفایل قرار دارد.",
+                targetRect = targetRects["profile_education_card"],
                 spotlights = listOf(
                     SpotlightShape(
-                        offsetDp = DpOffset(x = 0.dp, y = 0.dp),
+                        offsetDp = DpOffset(0.dp, 0.dp),
                         shape = TargetShape.RoundedRect(
-                            widthDp = 220.dp,
-                            heightDp = 52.dp,
-                            cornerRadiusDp = 16.dp
+                            widthDp = 300.dp,
+                            heightDp = 80.dp,
+                            cornerRadiusDp = 20.dp
                         )
                     )
                 )
