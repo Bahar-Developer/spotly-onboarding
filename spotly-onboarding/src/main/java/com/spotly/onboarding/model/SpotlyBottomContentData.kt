@@ -2,10 +2,6 @@ package com.spotly.onboarding.model
 
 import com.spotly.onboarding.theme.SpotlyColors
 
-/**
- * Holds the state and actions required to render a custom bottom content
- * in the Spotly guide.
- */
 data class SpotlyBottomContentData(
     val title: String,
     val description: String,
@@ -14,7 +10,9 @@ data class SpotlyBottomContentData(
     val isFirstStep: Boolean,
     val isLastStep: Boolean,
     val onNext: () -> Unit,
-    val onPrevious: () -> Unit,
     val onSkipOrFinish: () -> Unit,
-    val colors: SpotlyColors
+    val onPrevious: () -> Unit,
+    val colors: SpotlyColors,
+    val showTooltipTail: Boolean = step.showTooltipTail,
+    val tooltipPosition: TooltipPosition = step.tooltipPosition
 )

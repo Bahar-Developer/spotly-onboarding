@@ -2,17 +2,7 @@ package com.spotly.onboarding.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -24,8 +14,10 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.zIndex
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
+import com.spotly.onboarding.model.TooltipPosition
 import com.spotly.onboarding.theme.SpotlyColors
 
 @Composable
@@ -39,22 +31,64 @@ fun SpotlyBottomContent(
     onNext: () -> Unit,
     onSkipOrFinish: () -> Unit,
     onPreviousStep: () -> Unit,
-    colors: SpotlyColors
+    colors: SpotlyColors,
+    showTooltipTail: Boolean = false,
+    tooltipPosition: TooltipPosition = TooltipPosition.BOTTOM
 ) {
+    val isTop = tooltipPosition == TooltipPosition.TOP
+
     Column(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Bottom
+        verticalArrangement = if (isTop) Arrangement.Top else Arrangement.Bottom
     ) {
         Box(
             modifier = Modifier.fillMaxWidth()
         ) {
+
+            if (showTooltipTail && isTop) {
+                Canvas(
+                    modifier = Modifier
+                        .width(32.dp)
+                        .height(14.dp)
+                        .align(Alignment.BottomCenter)
+                        .offset(y = 14.dp)
+                        .zIndex(2f)
+                ) {
+                    val path = Path().apply {
+                        moveTo(0f, 0f)
+                        lineTo(size.width, 0f)
+                        lineTo(size.width / 2f, size.height)
+                        close()
+                    }
+                    drawPath(path = path, color = colors.containerBackground)
+                }
+            }
+
+            if (showTooltipTail && !isTop) {
+                Canvas(
+                    modifier = Modifier
+                        .width(32.dp)
+                        .height(14.dp)
+                        .align(Alignment.TopCenter)
+                        .offset(y = (-14).dp)
+                        .zIndex(2f)
+                ) {
+                    val path = Path().apply {
+                        moveTo(size.width / 2f, 0f)
+                        lineTo(size.width, size.height)
+                        lineTo(0f, size.height)
+                        close()
+                    }
+                    drawPath(path = path, color = colors.containerBackground)
+                }
+            }
 
             SpotlyProgressIndicator(
                 progress = progress,
                 color = colors.progressColor,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .align(Alignment.TopCenter)
+                    .align(if (isTop) Alignment.BottomCenter else Alignment.TopCenter)
                     .zIndex(1f)
             )
 
@@ -64,7 +98,9 @@ fun SpotlyBottomContent(
                     .background(
                         color = colors.containerBackground
                     )
-                    .navigationBarsPadding()
+                    .then(
+                        if (isTop) Modifier.statusBarsPadding() else Modifier.navigationBarsPadding()
+                    )
                     .padding(16.dp)
             ) {
 

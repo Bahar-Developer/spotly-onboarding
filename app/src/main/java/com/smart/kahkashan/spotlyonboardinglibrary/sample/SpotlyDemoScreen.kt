@@ -69,9 +69,11 @@ fun SpotlyDemoScreen() {
             GuideStep(
                 title = "بخش ترافیک دستگاه‌ها",
                 description = "نمودار میله‌ای ترافیک کاربران بر اساس پلتفرم‌های مختلف (لینوکس، اندروید، مک و ...).",
-                targetRect = targetRects["dashboard_search_btn"]
+                targetRect = targetRects["dashboard_search_btn"],
+                isPulseAnimationEnabled = true,
+                spotlightPadding = 6.dp
             )
-        )
+        ).map { it.copy(allowTargetClickThrough = true, showTooltipTail = false) }
     }
 
     // تعریف کامل استپ‌های شیفت (مطابق با طراحی انتخاب شیفت)
@@ -160,7 +162,7 @@ fun SpotlyDemoScreen() {
                 imageRes = R.drawable.img_profile_onboarding_step9,
                 spotlights = listOf(SpotlightShape(offsetDp = DpOffset(x = centerX, y = 450.dp), shape = TargetShape.RoundedRect(widthDp = fullWidth, heightDp = 67.dp, cornerRadiusDp = 999.dp)))
             )
-        )
+        ).map { it.copy(allowTargetClickThrough = true, showTooltipTail = true) }
     }
 
     // تعریف استپ‌های چندگانه برای تب پروفایل مطابق با طراحی جدید
@@ -181,7 +183,7 @@ fun SpotlyDemoScreen() {
                 description = "اطلاعات حساب بانکی و تراکنش‌ها را مدیریت کنید.",
                 targetRect = targetRects["profile_payment_card"]
             )
-        )
+        ).map { it.copy(allowTargetClickThrough = true, showTooltipTail = true) }
     }
 
     val currentSteps = when (currentScreen) {

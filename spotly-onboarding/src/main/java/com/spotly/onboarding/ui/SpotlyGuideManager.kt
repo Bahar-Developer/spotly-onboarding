@@ -34,6 +34,7 @@ import com.spotly.onboarding.model.ProgressMode
 import com.spotly.onboarding.model.SpotlightShape
 import com.spotly.onboarding.model.TargetShape
 import com.spotly.onboarding.model.SpotlyBottomContentData
+import com.spotly.onboarding.model.TooltipPosition
 import com.spotly.onboarding.theme.SpotlyColors
 import com.spotly.onboarding.ui.MorphingMultiSpotlightOverlay
 
@@ -71,7 +72,8 @@ fun SpotlyGuideManager(
             onNext = data.onNext,
             onSkipOrFinish = data.onSkipOrFinish,
             onPreviousStep = data.onPrevious,
-            colors = data.colors
+            colors = data.colors,
+            showTooltipTail = data.showTooltipTail
         )
     }
 ) {
@@ -443,6 +445,21 @@ fun SpotlyGuideManager(
             overlayColor =
                 colors.overlayColor,
 
+            spotlightPadding =
+                currentStep.spotlightPadding,
+
+            isPulseAnimationEnabled =
+                currentStep.isPulseAnimationEnabled,
+
+            allowTargetClickThrough =
+                currentStep.allowTargetClickThrough,
+
+            onSpotlightClick = {
+                if (currentStep.allowTargetClickThrough) {
+                    onNextStep()
+                }
+            },
+
             modifier =
                 Modifier.fillMaxSize()
         )
@@ -498,6 +515,19 @@ fun SpotlyGuideManager(
                 }
             }
 
+            val resolvedPosition = when (currentStep.tooltipPosition) {
+                TooltipPosition.TOP -> TooltipPosition.TOP
+                TooltipPosition.BOTTOM -> TooltipPosition.BOTTOM
+                TooltipPosition.AUTO -> {
+                    val spotlightCenterY = currentStep.targetRect?.center?.y ?: 600f
+                    if (spotlightCenterY > 700f) {
+                        TooltipPosition.TOP
+                    } else {
+                        TooltipPosition.BOTTOM
+                    }
+                }
+            }
+
             val contentData = SpotlyBottomContentData(
                 title = currentStep.title,
                 description = currentStep.description,
@@ -505,6 +535,7 @@ fun SpotlyGuideManager(
                 progress = progressValue,
                 isFirstStep = isFirstStep,
                 isLastStep = isLastStep,
+                tooltipPosition = resolvedPosition,
                 onNext = {
                     if (currentStep.trackingTag.isNotEmpty()) {
                         onTrackingEvent?.invoke(currentStep.trackingTag, OnboardingAction.NEXT_CLICK)
